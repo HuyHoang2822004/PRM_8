@@ -31,10 +31,31 @@ class CartItemWidget extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(onPressed: onDecrease, icon: const Icon(Icons.remove)),
+                Semantics(
+                  label: 'Decrease quantity',
+                  button: true,
+                  child: IconButton(
+                    onPressed: onDecrease,
+                    icon: const Icon(Icons.remove),
+                  ),
+                ),
                 Text('${item.quantity}'),
-                IconButton(onPressed: onIncrease, icon: const Icon(Icons.add)),
-                IconButton(onPressed: onRemove, icon: const Icon(Icons.delete_outline)),
+                Semantics(
+                  label: 'Increase quantity',
+                  button: true,
+                  child: IconButton(
+                    onPressed: onIncrease,
+                    icon: const Icon(Icons.add),
+                  ),
+                ),
+                Semantics(
+                  label: 'Remove item',
+                  button: true,
+                  child: IconButton(
+                    onPressed: onRemove,
+                    icon: const Icon(Icons.delete_outline),
+                  ),
+                ),
               ],
             ),
           ],

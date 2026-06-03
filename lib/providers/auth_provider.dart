@@ -17,19 +17,6 @@ class AuthProvider extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
-    if (!email.contains('@')) {
-      status = AuthStatus.error;
-      errorMessage = 'Email không hợp lệ';
-      notifyListeners();
-      return;
-    }
-    if (password.length < 6) {
-      status = AuthStatus.error;
-      errorMessage = 'Mật khẩu tối thiểu 6 ký tự';
-      notifyListeners();
-      return;
-    }
-
     final ok = await _authService.login(email, password);
     isLoggedIn = ok;
     status = ok ? AuthStatus.success : AuthStatus.error;

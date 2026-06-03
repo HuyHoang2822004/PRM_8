@@ -98,13 +98,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             CustomButton(
               onPressed: () {
                 final cart = context.read<CartProvider>();
-                for (var i = 0; i < quantity; i++) {
-                  cart.addToCart(
-                    widget.product,
-                    size: selectedSize!,
-                    color: selectedColor!,
-                  );
-                }
+                cart.addToCart(
+                  widget.product,
+                  size: selectedSize!,
+                  color: selectedColor!,
+                  quantity: quantity,
+                );
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Added to cart')),
                 );

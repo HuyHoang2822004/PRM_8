@@ -8,15 +8,28 @@ class CartProvider extends ChangeNotifier {
 
   List<CartItem> get items => List.unmodifiable(_items);
 
-  void addToCart(Product product, {required int size, required String color}) {
+  void addToCart(
+    Product product, {
+    required int size,
+    required String color,
+    int quantity = 1,
+  }) {
+    if (quantity <= 0) return;
     final index = _items.indexWhere(
       (item) =>
           item.product.id == product.id && item.size == size && item.color == color,
     );
     if (index >= 0) {
-      _items[index].quantity++;
+      _items[index].quantity += quantity;
     } else {
-      _items.add(CartItem(product: product, size: size, color: color));
+      _items.add(
+        CartItem(
+          product: product,
+          size: size,
+          color: color,
+          quantity: quantity,
+        ),
+      );
     }
     notifyListeners();
   }
