@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "name": "Nike Air Force 1",
+    "brand": "Nike",
+    "price": 2990000,
+    "sizes": [38, 39, 40, 41, 42],
+    "colors": ["White", "Black"],
+    "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
+    "description": "Classic sneaker for daily style."
+  },
+  {
+    "id": 2,
+    "name": "Adidas Samba",
+    "brand": "Adidas",
+    "price": 2790000,
+    "sizes": [37, 38, 39, 40, 41],
+    "colors": ["White", "Blue"],
+    "image": "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=800",
+    "description": "Vintage football icon with modern comfort."
+  },
+  {
+    "id": 3,
+    "name": "Jordan 1 Low",
+    "brand": "Jordan",
+    "price": 3490000,
+    "sizes": [39, 40, 41, 42],
+    "colors": ["Red", "Black"],
+    "image": "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?w=800",
+    "description": "Legendary Jordan silhouette."
+  },
+  {
+    "id": 4,
+    "name": "Puma Suede",
+    "brand": "Puma",
+    "price": 2490000,
+    "sizes": [38, 39, 40, 41],
+    "colors": ["Green", "Black"],
+    "image": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=800",
+    "description": "Simple and timeless suede style."
+  }
+]
