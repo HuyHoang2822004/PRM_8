@@ -11,6 +11,7 @@ class AuthProvider extends ChangeNotifier {
   AuthStatus status = AuthStatus.initial;
   String? errorMessage;
   bool isLoggedIn = false;
+  Map<String, String> userProfile = {};
 
   Future<void> login(String email, String password) async {
     status = AuthStatus.loading;
@@ -19,20 +20,53 @@ class AuthProvider extends ChangeNotifier {
 
     final ok = await _authService.login(email, password);
     isLoggedIn = ok;
-    status = ok ? AuthStatus.success : AuthStatus.error;
+    if (ok) {
+      userProfile = await _authService.getUserProfile();
+      status = AuthStatus.success;
+    } else {
+      status = AuthStatus.error;
+    }
+    notifyListeners();
+  }
+
+  Future<void> register(
+    String name,
+    String email,
+    String password,
+    String phone,
+    String address,
+  ) async {
+    status = AuthStatus.loading;
+    errorMessage = null;
+    notifyListeners();
+
+    final ok = await _authService.register(name, email, password, phone, address);
+    isLoggedIn = ok;
+    if (ok) {
+      userProfile = await _authService.getUserProfile();
+      status = AuthStatus.success;
+    } else {
+      status = AuthStatus.error;
+    }
     notifyListeners();
   }
 
   Future<void> logout() async {
     await _authService.logout();
     isLoggedIn = false;
+    userProfile = {};
     status = AuthStatus.initial;
     notifyListeners();
   }
 
   Future<void> checkLogin() async {
     isLoggedIn = await _authService.checkLogin();
-    status = isLoggedIn ? AuthStatus.success : AuthStatus.initial;
+    if (isLoggedIn) {
+      userProfile = await _authService.getUserProfile();
+      status = AuthStatus.success;
+    } else {
+      status = AuthStatus.initial;
+    }
     notifyListeners();
   }
 }

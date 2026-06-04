@@ -7,18 +7,25 @@ class NotificationProvider extends ChangeNotifier {
 
   Future<void> loadNotifications() async {
     await Future.delayed(const Duration(milliseconds: 250));
+    if (notifications.isNotEmpty) return;
     notifications = [
       AppNotification(
         id: 1,
-        title: '🔥 Summer Sale',
-        body: '20% OFF',
-        timeAgo: '2 hours ago',
+        title: '🔥 Siêu Ưu Đãi Hè - Chrono Luxury',
+        body: 'Giảm giá lên đến 20% cho các dòng Casio và Citizen chính hãng. Mua ngay kẻo lỡ!',
+        timeAgo: '2 giờ trước',
       ),
       AppNotification(
         id: 2,
-        title: '📦 Order Delivered',
-        body: 'Yesterday',
-        timeAgo: '1 day ago',
+        title: '📦 Đơn hàng đã được xác nhận',
+        body: 'Chúc mừng! Đơn hàng của bạn đã được hệ thống Chrono duyệt thành công và đang chuyển cho đơn vị vận chuyển.',
+        timeAgo: '1 ngày trước',
+      ),
+      AppNotification(
+        id: 3,
+        title: '✨ BST Rolex Submariner Mới',
+        body: 'Rolex Submariner màu xanh lục cực hiếm đã cập bến cửa hàng 123 Nguyễn Văn Linh, Quận 7.',
+        timeAgo: '3 ngày trước',
       ),
     ];
     notifyListeners();

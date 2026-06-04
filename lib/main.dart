@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
           final router = createRouter(context.watch<AuthProvider>());
           return MaterialApp.router(
             debugShowCheckedModeBanner: false,
-            title: 'Sneaker Shop',
+            title: 'Chrono Luxury',
             theme: AppTheme.lightTheme,
             routerConfig: router,
           );

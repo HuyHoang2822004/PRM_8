@@ -3,15 +3,15 @@ import 'product.dart';
 class CartItem {
   CartItem({
     required this.product,
-    required this.size,
+    required this.strap,
     required this.color,
     this.quantity = 1,
   });
 
   final Product product;
-  final int size;
+  final String strap;
   final String color;
   int quantity;
 
-  double get total => quantity * product.price.toDouble();
+  double get total => quantity * product.activePrice.toDouble();
 }

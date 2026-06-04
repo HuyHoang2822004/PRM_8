@@ -12,8 +12,8 @@ class ChatProvider extends ChangeNotifier {
   void loadMessages() {
     if (messages.isNotEmpty) return;
     messages.addAll([
-      const Message(content: 'Hello shop', isFromUser: true),
-      const Message(content: 'Hi, how can I help you?', isFromUser: false),
+      const Message(content: 'Xin chào shop!', isFromUser: true),
+      const Message(content: 'Chào bạn! Cửa hàng Chrono Luxury xin chào. Bạn cần hỗ trợ gì ạ?', isFromUser: false),
     ]);
     notifyListeners();
   }
@@ -22,7 +22,9 @@ class ChatProvider extends ChangeNotifier {
     if (text.trim().isEmpty) return;
     messages.add(Message(content: text.trim(), isFromUser: true));
     notifyListeners();
-    final reply = await _chatService.autoReply();
+    
+    // Simulate auto response from bot
+    final reply = await _chatService.autoReply(text);
     messages.add(Message(content: reply, isFromUser: false));
     notifyListeners();
   }

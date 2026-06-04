@@ -1,4 +1,12 @@
 class AppConstants {
-  static const String appName = 'Sneaker Shop';
-  static const List<String> brands = ['All', 'Nike', 'Adidas', 'Jordan', 'Puma'];
+  static const String appName = 'Chrono Luxury';
+  static const List<String> brands = [
+    'All',
+    'Rolex',
+    'Casio',
+    'Seiko',
+    'Citizen',
+    'Tissot',
+    'Apple Watch'
+  ];
 }

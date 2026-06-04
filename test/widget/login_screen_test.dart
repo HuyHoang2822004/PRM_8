@@ -28,10 +28,12 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Login'));
+    // Click on local Vietnamese submit button
+    await tester.tap(find.text('ĐĂNG NHẬP'));
     await tester.pump();
 
-    expect(find.text('Email required'), findsOneWidget);
-    expect(find.text('Password required'), findsOneWidget);
+    // Verify local Vietnamese validation messages appear
+    expect(find.text('Vui lòng nhập Email hoặc Số điện thoại'), findsOneWidget);
+    expect(find.text('Vui lòng nhập mật khẩu'), findsOneWidget);
   });
 }

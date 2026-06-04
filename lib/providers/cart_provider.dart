@@ -10,14 +10,14 @@ class CartProvider extends ChangeNotifier {
 
   void addToCart(
     Product product, {
-    required int size,
+    required String strap,
     required String color,
     int quantity = 1,
   }) {
     if (quantity <= 0) return;
     final index = _items.indexWhere(
       (item) =>
-          item.product.id == product.id && item.size == size && item.color == color,
+          item.product.id == product.id && item.strap == strap && item.color == color,
     );
     if (index >= 0) {
       _items[index].quantity += quantity;
@@ -25,7 +25,7 @@ class CartProvider extends ChangeNotifier {
       _items.add(
         CartItem(
           product: product,
-          size: size,
+          strap: strap,
           color: color,
           quantity: quantity,
         ),
@@ -60,4 +60,7 @@ class CartProvider extends ChangeNotifier {
 
   double get totalAmount =>
       _items.fold(0, (total, item) => total + item.total);
+
+  int get totalQuantity =>
+      _items.fold(0, (total, item) => total + item.quantity);
 }

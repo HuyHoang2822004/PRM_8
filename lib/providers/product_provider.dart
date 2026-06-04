@@ -11,7 +11,12 @@ class ProductProvider extends ChangeNotifier {
   List<Product> products = [];
   bool isLoading = false;
   String? errorMessage;
+  
   String selectedBrand = 'All';
+  String searchQuery = '';
+  bool onlyDiscount = false;
+  bool onlyInStock = false;
+  double? maxPriceLimit;
 
   Future<void> loadProducts() async {
     isLoading = true;
@@ -19,9 +24,9 @@ class ProductProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _allProducts = await _productService.loadProducts();
-      products = List.of(_allProducts);
+      _applyFilters();
     } catch (_) {
-      errorMessage = 'Không thể tải sản phẩm';
+      errorMessage = 'Không thể tải danh sách đồng hồ';
     } finally {
       isLoading = false;
       notifyListeners();
@@ -29,17 +34,52 @@ class ProductProvider extends ChangeNotifier {
   }
 
   void searchProducts(String query) {
-    final q = query.toLowerCase().trim();
-    products = _allProducts.where((p) {
-      final brandMatch = selectedBrand == 'All' || p.brand == selectedBrand;
-      final searchMatch = q.isEmpty || p.name.toLowerCase().contains(q);
-      return brandMatch && searchMatch;
-    }).toList();
-    notifyListeners();
+    searchQuery = query;
+    _applyFilters();
   }
 
   void filterByBrand(String brand) {
     selectedBrand = brand;
-    searchProducts('');
+    _applyFilters();
+  }
+
+  void toggleDiscountFilter(bool value) {
+    onlyDiscount = value;
+    _applyFilters();
+  }
+
+  void toggleInStockFilter(bool value) {
+    onlyInStock = value;
+    _applyFilters();
+  }
+
+  void setMaxPrice(double? price) {
+    maxPriceLimit = price;
+    _applyFilters();
+  }
+
+  void resetFilters() {
+    selectedBrand = 'All';
+    searchQuery = '';
+    onlyDiscount = false;
+    onlyInStock = false;
+    maxPriceLimit = null;
+    _applyFilters();
+  }
+
+  void _applyFilters() {
+    final q = searchQuery.toLowerCase().trim();
+    products = _allProducts.where((p) {
+      final brandMatch = selectedBrand == 'All' || p.brand == selectedBrand;
+      final searchMatch = q.isEmpty ||
+          p.name.toLowerCase().contains(q) ||
+          p.brand.toLowerCase().contains(q);
+      final discountMatch = !onlyDiscount || p.hasDiscount;
+      final stockMatch = !onlyInStock || p.stock > 0;
+      final priceMatch = maxPriceLimit == null || p.activePrice <= maxPriceLimit!;
+      
+      return brandMatch && searchMatch && discountMatch && stockMatch && priceMatch;
+    }).toList();
+    notifyListeners();
   }
 }

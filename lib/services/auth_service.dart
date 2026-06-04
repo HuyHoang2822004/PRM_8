@@ -12,6 +12,23 @@ class AuthService {
     return true;
   }
 
+  Future<bool> register(
+    String name,
+    String email,
+    String password,
+    String phone,
+    String address,
+  ) async {
+    await Future.delayed(const Duration(milliseconds: 600));
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_name', name);
+    await prefs.setString('user_phone', phone);
+    await prefs.setString('user_address', address);
+    await prefs.setString(_emailKey, email);
+    await prefs.setBool(_loginKey, true);
+    return true;
+  }
+
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_loginKey, false);
@@ -21,5 +38,15 @@ class AuthService {
   Future<bool> checkLogin() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_loginKey) ?? false;
+  }
+  
+  Future<Map<String, String>> getUserProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    return {
+      'name': prefs.getString('user_name') ?? 'Khách hàng',
+      'email': prefs.getString(_emailKey) ?? '',
+      'phone': prefs.getString('user_phone') ?? '',
+      'address': prefs.getString('user_address') ?? '',
+    };
   }
 }
