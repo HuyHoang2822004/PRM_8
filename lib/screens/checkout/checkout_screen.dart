@@ -3,7 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/theme/app_colors.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_routes.dart';
+import '../../core/constants/app_strings.dart';
 import '../../models/order.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/cart_provider.dart';
@@ -29,7 +31,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   void initState() {
     super.initState();
-    // Pre-fill recipient info from auth profile
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final auth = context.read<AuthProvider>();
       if (auth.isLoggedIn) {
@@ -59,7 +60,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     if (cart.items.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Giỏ hàng trống, không thể đặt hàng'),
+          content: Text(AppStrings.checkoutCartEmpty),
           backgroundColor: AppColors.accent,
         ),
       );
@@ -73,17 +74,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       phone: _phoneController.text.trim(),
       address: _addressController.text.trim(),
       paymentMethod: _paymentMethod,
+      createdAt: DateTime.now(),
     );
 
     final created = await orderProvider.createOrder(order);
     if (!mounted) return;
     if (created != null) {
       cart.clearCart();
-      context.go('/order-success');
+      context.go(AppRoutes.orderSuccess);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(orderProvider.errorMessage ?? 'Không thể đặt hàng, vui lòng thử lại'),
+          content: Text(orderProvider.errorMessage ?? AppStrings.orderFailed),
           backgroundColor: AppColors.accent,
         ),
       );
@@ -95,14 +97,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final formatter = NumberFormat.decimalPattern('vi');
     final cart = context.watch<CartProvider>();
     
-    // Calculate shipping (free over 5,000,000)
     final shippingFee = cart.totalAmount > 5000000 ? 0 : 30000;
     final finalTotal = cart.totalAmount + shippingFee;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('XÁC NHẬN ĐƠN HÀNG'),
+        title: const Text(AppStrings.checkoutTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, size: 18),
           onPressed: () => context.pop(),
@@ -114,7 +115,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // 1. Order Summary Card
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -122,11 +122,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'TÓM TẮT ĐƠN HÀNG',
+                        AppStrings.orderSummary,
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5),
                       ),
                       const Divider(height: 20),
-                      // List of products
                       ...cart.items.map((item) => Padding(
                             padding: const EdgeInsets.only(bottom: 8),
                             child: Row(
@@ -149,11 +148,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             ),
                           )),
                       const Divider(height: 20),
-                      // Details
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Tiền hàng:', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                          const Text(AppStrings.orderSummarySubtotal, style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                           Text('${formatter.format(cart.totalAmount)}đ', style: const TextStyle(fontSize: 13)),
                         ],
                       ),
@@ -161,9 +159,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Phí giao hàng:', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                          const Text(AppStrings.orderSummaryShipping, style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                           Text(
-                            shippingFee == 0 ? 'Miễn phí' : '${formatter.format(shippingFee)}đ',
+                            shippingFee == 0 ? AppStrings.freeShippingText : '${formatter.format(shippingFee)}đ',
                             style: TextStyle(
                               fontSize: 13,
                               color: shippingFee == 0 ? Colors.green : AppColors.textPrimary,
@@ -177,7 +175,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
-                            'Tổng thanh toán:',
+                            AppStrings.orderSummaryTotal,
                             style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                           ),
                           Text(
@@ -196,7 +194,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
               const SizedBox(height: 16),
               
-              // 2. Shipping Details Card
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -204,29 +201,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'THÔNG TIN GIAO HÀNG',
+                        AppStrings.shippingInfo,
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5),
                       ),
                       const SizedBox(height: 16),
                       CustomTextField(
                         controller: _nameController,
-                        label: 'Họ tên người nhận',
+                        label: AppStrings.shippingName,
                         validator: (value) => value == null || value.trim().isEmpty
-                            ? 'Vui lòng nhập họ tên người nhận'
+                            ? AppStrings.validateShippingNameEmpty
                             : null,
                       ),
                       const SizedBox(height: 12),
                       CustomTextField(
                         controller: _phoneController,
-                        label: 'Số điện thoại liên hệ',
+                        label: AppStrings.shippingPhone,
                         keyboardType: TextInputType.phone,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Vui lòng nhập số điện thoại';
+                            return AppStrings.validatePhoneEmpty;
                           }
                           final phoneRegex = RegExp(r'^[0-9]{9,11}$');
                           if (!phoneRegex.hasMatch(value.trim())) {
-                            return 'Số điện thoại không hợp lệ (9-11 số)';
+                            return AppStrings.validatePhoneLength;
                           }
                           return null;
                         },
@@ -234,15 +231,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       const SizedBox(height: 12),
                       CustomTextField(
                         controller: _addressController,
-                        label: 'Địa chỉ giao hàng chi tiết',
+                        label: AppStrings.shippingAddress,
                         validator: (value) => value == null || value.trim().isEmpty
-                            ? 'Vui lòng nhập địa chỉ nhận hàng'
+                            ? AppStrings.validateAddressEmpty
                             : null,
                       ),
                       const SizedBox(height: 12),
                       CustomTextField(
                         controller: _noteController,
-                        label: 'Ghi chú cho shipper (Không bắt buộc)',
+                        label: AppStrings.note,
                       ),
                     ],
                   ),
@@ -250,7 +247,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
               const SizedBox(height: 16),
               
-              // 3. Payment Method Card
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -258,7 +254,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'PHƯƠNG THỨC THANH TOÁN',
+                        AppStrings.paymentMethod,
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5),
                       ),
                       const SizedBox(height: 12),
@@ -268,7 +264,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         groupValue: _paymentMethod,
                         activeColor: AppColors.primary,
                         onChanged: (value) => setState(() => _paymentMethod = value!),
-                        title: const Text('Thanh toán khi nhận hàng (COD)', style: TextStyle(fontSize: 13)),
+                        title: const Text(AppStrings.codPayment, style: TextStyle(fontSize: 13)),
                       ),
                       RadioListTile<String>(
                         contentPadding: EdgeInsets.zero,
@@ -276,10 +272,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         groupValue: _paymentMethod,
                         activeColor: AppColors.primary,
                         onChanged: (value) => setState(() => _paymentMethod = value!),
-                        title: const Text('Chuyển khoản ngân hàng (Techcombank)', style: TextStyle(fontSize: 13)),
+                        title: const Text(AppStrings.bankPayment, style: TextStyle(fontSize: 13)),
                       ),
                       
-                      // Animated Bank Transfer instructions with Simulated QR
                       AnimatedCrossFade(
                         firstChild: const SizedBox.shrink(),
                         secondChild: Container(
@@ -298,18 +293,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   Icon(Icons.account_balance, size: 18, color: AppColors.accent),
                                   SizedBox(width: 8),
                                   Text(
-                                    'Thông tin tài khoản cửa hàng',
+                                    AppStrings.bankInfoTitle,
                                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.textPrimary),
                                   ),
                                 ],
                               ),
                               const SizedBox(height: 10),
-                              const Text('• Ngân hàng: Techcombank (TCB)', style: TextStyle(fontSize: 12)),
-                              const Text('• Số tài khoản: 19035678889012', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                              const Text('• Tên chủ tài khoản: CONG TY CHRONO LUXURY', style: TextStyle(fontSize: 12)),
+                              const Text(AppStrings.bankInfoBank, style: TextStyle(fontSize: 12)),
+                              const Text(AppStrings.bankInfoNumber, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                              const Text(AppStrings.bankInfoHolder, style: TextStyle(fontSize: 12)),
                               Text('• Nội dung: CHRONO ${DateTime.now().millisecond}', style: const TextStyle(fontSize: 12)),
                               const SizedBox(height: 14),
-                              // Visual QR Code Simulation
                               Center(
                                 child: Container(
                                   padding: const EdgeInsets.all(8),
@@ -334,7 +328,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                               Icon(Icons.qr_code_2, size: 64, color: AppColors.primary.withOpacity(0.85)),
                                               const SizedBox(height: 4),
                                               const Text(
-                                                'MÃ QR THANH TOÁN',
+                                                AppStrings.qrTitle,
                                                 style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                                               ),
                                             ],
@@ -343,7 +337,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                       ),
                                       const SizedBox(height: 6),
                                       const Text(
-                                        'Quét mã để chuyển khoản nhanh',
+                                        AppStrings.qrPrompt,
                                         style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
                                       ),
                                     ],
@@ -364,10 +358,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
               const SizedBox(height: 24),
               
-              // 4. Place Order button
               CustomButton(
                 onPressed: _placeOrder,
-                label: 'HOÀN TẤT ĐẶT HÀNG',
+                label: AppStrings.placeOrderButton,
                 isLoading: orderProvider.isSubmitting,
               ),
               const SizedBox(height: 20),

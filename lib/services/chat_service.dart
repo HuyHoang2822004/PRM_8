@@ -1,4 +1,28 @@
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/message.dart';
+
 class ChatService {
+  static const _chatKey = 'chrono_chat_messages';
+
+  Future<List<Message>> loadPersistedMessages() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonStr = prefs.getString(_chatKey);
+    if (jsonStr == null) return [];
+    try {
+      final list = json.decode(jsonStr) as List<dynamic>;
+      return list.map((m) => Message.fromJson(m as Map<String, dynamic>)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<void> savePersistedMessages(List<Message> messages) async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonStr = json.encode(messages.map((m) => m.toJson()).toList());
+    await prefs.setString(_chatKey, jsonStr);
+  }
+
   Future<String> autoReply(String userMessage) async {
     await Future.delayed(const Duration(milliseconds: 800));
     final msg = userMessage.toLowerCase();

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/theme/app_colors.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_routes.dart';
+import '../../core/constants/app_strings.dart';
 import '../../widgets/common/custom_button.dart';
 
 class OrderSuccessScreen extends StatelessWidget {
@@ -20,7 +22,6 @@ class OrderSuccessScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Animated success icon representation
                 const Center(
                   child: Stack(
                     alignment: Alignment.center,
@@ -35,7 +36,7 @@ class OrderSuccessScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  'ĐẶT HÀNG THÀNH CÔNG',
+                  AppStrings.orderSuccessTitle,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20,
@@ -46,7 +47,7 @@ class OrderSuccessScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Cảm ơn bạn đã lựa chọn Chrono Luxury. Đơn hàng của bạn đã được tiếp nhận và lưu trữ thành công trên hệ thống dữ liệu.',
+                  AppStrings.orderSuccessSubtitle,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 13,
@@ -56,7 +57,6 @@ class OrderSuccessScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 
-                // Delivery steps indicators
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -88,8 +88,8 @@ class OrderSuccessScreen extends StatelessWidget {
                 
                 const SizedBox(height: 36),
                 CustomButton(
-                  onPressed: () => context.go('/home'),
-                  label: 'QUAY LẠI TRANG CHỦ',
+                  onPressed: () => context.go(AppRoutes.home),
+                  label: AppStrings.backToHomeButton,
                 ),
               ],
             ),

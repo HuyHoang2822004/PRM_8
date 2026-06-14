@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_constants.dart';
-import '../../core/theme/app_colors.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_routes.dart';
+import '../../core/constants/app_strings.dart';
 import '../../models/product.dart';
 import '../../providers/product_provider.dart';
 import '../../widgets/common/loading_widget.dart';
@@ -37,7 +39,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   }
 
   void _openDetail(Product product) {
-    context.push('/product-detail', extra: product);
+    context.push(AppRoutes.productDetail, extra: product);
   }
 
   @override
@@ -55,7 +57,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Hero Banner
               Container(
                 height: 180,
                 width: double.infinity,
@@ -103,7 +104,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: const Text(
-                              'COLLECTION 2026',
+                              AppStrings.collectionTitle,
                               style: TextStyle(
                                 color: AppColors.accent,
                                 fontSize: 9,
@@ -114,7 +115,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           ),
                           const SizedBox(height: 10),
                           const Text(
-                            'TIMELESS ELEGANCE',
+                            AppStrings.bannerTitle,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 20,
@@ -124,7 +125,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           ),
                           const SizedBox(height: 4),
                           const Text(
-                            'Khám phá những chiếc đồng hồ mang tính biểu tượng lịch sử.',
+                            AppStrings.bannerSubtitle,
                             style: TextStyle(
                               color: Colors.grey,
                               fontSize: 11,
@@ -138,7 +139,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
               ),
               const SizedBox(height: 20),
               
-              // Search & Filter Actions Row
               Row(
                 children: [
                   Expanded(
@@ -148,7 +148,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         controller: _searchController,
                         onChanged: provider.searchProducts,
                         decoration: InputDecoration(
-                          hintText: 'Tìm kiếm đồng hồ...',
+                          hintText: AppStrings.searchPhone,
                           prefixIcon: const Icon(Icons.search, size: 20, color: AppColors.textSecondary),
                           suffixIcon: _searchController.text.isNotEmpty
                               ? IconButton(
@@ -184,7 +184,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 ],
               ),
               
-              // Advanced Filters Expansion
               AnimatedCrossFade(
                 firstChild: const SizedBox.shrink(),
                 secondChild: Container(
@@ -199,16 +198,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Bộ lọc nâng cao',
+                        AppStrings.advancedFilters,
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                       ),
                       const SizedBox(height: 14),
-                      // Switches
                       Row(
                         children: [
                           Expanded(
                             child: FilterChip(
-                              label: const Text('Đang giảm giá'),
+                              label: const Text(AppStrings.onlyDiscount),
                               selected: provider.onlyDiscount,
                               onSelected: provider.toggleDiscountFilter,
                               selectedColor: AppColors.primary.withOpacity(0.08),
@@ -218,7 +216,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: FilterChip(
-                              label: const Text('Còn hàng trong kho'),
+                              label: const Text(AppStrings.onlyInStock),
                               selected: provider.onlyInStock,
                               onSelected: provider.toggleInStockFilter,
                               selectedColor: AppColors.primary.withOpacity(0.08),
@@ -228,9 +226,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      // Price Limit Slider
                       Text(
-                        'Giá tối đa: ${provider.maxPriceLimit == null ? "Không giới hạn" : "${(provider.maxPriceLimit! / 1000000).toStringAsFixed(1)} triệuđ"}',
+                        '${AppStrings.maxPrice}: ${provider.maxPriceLimit == null ? "Không giới hạn" : "${(provider.maxPriceLimit! / 1000000).toStringAsFixed(1)} triệuđ"}',
                         style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
                       ),
                       Slider(
@@ -252,7 +249,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                             provider.resetFilters();
                             _searchController.clear();
                           },
-                          child: const Text('Đặt lại bộ lọc'),
+                          child: const Text(AppStrings.resetFiltersButton),
                         ),
                       ),
                     ],
@@ -263,9 +260,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
               ),
               const SizedBox(height: 16),
               
-              // Brand chips slider
               const Text(
-                'Thương hiệu nổi bật',
+                AppStrings.brandTitle,
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 0.5),
               ),
               const SizedBox(height: 8),
@@ -287,17 +283,15 @@ class _ProductListScreenState extends State<ProductListScreen> {
               ),
               const SizedBox(height: 18),
               
-              // Search metadata
               if (provider.products.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
-                    'Tìm thấy ${provider.products.length} sản phẩm đồng hồ',
+                    '${AppStrings.searchFound} ${provider.products.length} ${AppStrings.productsText}',
                     style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                 ),
 
-              // Product Grid display
               if (provider.isLoading)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 50),
@@ -319,7 +313,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         Icon(Icons.watch_off, size: 48, color: Colors.grey),
                         SizedBox(height: 12),
                         Text(
-                          'Không có sản phẩm nào phù hợp bộ lọc',
+                          AppStrings.noProductsFound,
                           style: TextStyle(color: AppColors.textSecondary),
                         ),
                       ],

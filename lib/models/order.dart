@@ -8,6 +8,8 @@ class Order {
     required this.phone,
     required this.address,
     required this.paymentMethod,
+    this.status = 'Chờ duyệt',
+    required this.createdAt,
   });
 
   final String id;
@@ -16,4 +18,8 @@ class Order {
   final String phone;
   final String address;
   final String paymentMethod;
+  final String status;
+  final DateTime createdAt;
+
+  double get totalAmount => items.fold(0.0, (sum, item) => sum + item.total);
 }

@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/theme/app_colors.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_routes.dart';
+import '../../core/constants/app_strings.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/notification_provider.dart';
+import '../../providers/product_provider.dart';
+import '../../providers/order_provider.dart';
 import '../cart/cart_screen.dart';
 import '../chat/chat_screen.dart';
 import '../map/map_screen.dart';
@@ -31,26 +35,63 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   ];
 
   final _titles = const [
-    'CHRONO LUXURY',
-    'GIỎ HÀNG CỦA BẠN',
-    'THÔNG BÁO',
-    'CỬA HÀNG BẢN ĐỒ',
-    'HỖ TRỢ TRỰC TUYẾN',
+    AppStrings.homeTitle,
+    AppStrings.cartTitle,
+    AppStrings.notificationTitle,
+    AppStrings.mapTitle,
+    AppStrings.chatTitle,
   ];
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final productProvider = context.read<ProductProvider>();
+      if (productProvider.products.isEmpty) {
+        await productProvider.loadProducts();
+      }
+      if (mounted) {
+        context.read<OrderProvider>().fetchOrders(productProvider.products);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final myEmail = auth.userProfile['email'] ?? 'guest';
+    final isManager = myEmail == 'admin@chrono.com';
+
+    if (isManager) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('TIN NHẮN KHÁCH HÀNG'),
+          elevation: 1,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout, color: Colors.redAccent),
+              tooltip: AppStrings.logout,
+              onPressed: () async {
+                await auth.logout();
+                if (!context.mounted) return;
+                context.go(AppRoutes.login);
+              },
+            ),
+            const SizedBox(width: 8),
+          ],
+        ),
+        body: const ChatScreen(),
+      );
+    }
+
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth >= 900;
     
-    final auth = context.watch<AuthProvider>();
     final cart = context.watch<CartProvider>();
     final notification = context.watch<NotificationProvider>();
     
-    // Count unread notifications
     final unreadCount = notification.notifications.where((n) => !n.isRead).length;
 
-    // Badged icons
     Widget cartIcon = Stack(
       clipBehavior: Clip.none,
       children: [
@@ -112,9 +153,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         elevation: 0,
         actions: [
           IconButton(
-            onPressed: () => context.push('/checkout'),
+            onPressed: () => context.push(AppRoutes.checkout),
             icon: cartIcon,
-            tooltip: 'Thanh toán',
+            tooltip: AppStrings.checkoutTitle,
           ),
           const SizedBox(width: 8),
         ],
@@ -137,36 +178,44 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   ),
                 ),
                 accountName: Text(
-                  auth.userProfile['name'] ?? 'Khách hàng',
+                  auth.userProfile['name'] ?? AppStrings.customer,
                   style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 accountEmail: Text(
-                  auth.userProfile['email'] ?? 'Chưa đăng nhập',
+                  auth.userProfile['email'] ?? AppStrings.notLoggedIn,
                   style: TextStyle(color: Colors.grey.shade300, fontSize: 13),
                 ),
               ),
               if (auth.userProfile['phone'] != null && auth.userProfile['phone']!.isNotEmpty)
                 ListTile(
                   leading: const Icon(Icons.phone_outlined, color: AppColors.primary),
-                  title: const Text('Số điện thoại', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  title: const Text(AppStrings.phoneLabel, style: TextStyle(fontSize: 12, color: Colors.grey)),
                   subtitle: Text(auth.userProfile['phone']!, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                 ),
               if (auth.userProfile['address'] != null && auth.userProfile['address']!.isNotEmpty)
                 ListTile(
                   leading: const Icon(Icons.location_on_outlined, color: AppColors.primary),
-                  title: const Text('Địa chỉ giao hàng', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  title: const Text(AppStrings.addressLabel, style: TextStyle(fontSize: 12, color: Colors.grey)),
                   subtitle: Text(auth.userProfile['address']!, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                 ),
               const Divider(),
+              ListTile(
+                leading: const Icon(Icons.receipt_long_outlined, color: AppColors.primary),
+                title: const Text(AppStrings.orderHistoryTitle, style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                onTap: () {
+                  Navigator.pop(context);
+                  context.push(AppRoutes.orderHistory);
+                },
+              ),
               const Spacer(),
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.logout, color: Colors.red),
-                title: const Text('Đăng xuất tài khoản', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                title: const Text(AppStrings.logout, style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
                 onTap: () async {
                   await auth.logout();
                   if (!context.mounted) return;
-                  context.go('/login');
+                  context.go(AppRoutes.login);
                 },
               ),
               const SizedBox(height: 20),
@@ -177,7 +226,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       body: isDesktop
           ? Row(
               children: [
-                // Elegant Side Navigation Rail for Desktop
                 NavigationRail(
                   selectedIndex: _index,
                   onDestinationSelected: (value) => setState(() => _index = value),
@@ -213,7 +261,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                   ],
                 ),
                 const VerticalDivider(thickness: 1, width: 1, color: AppColors.border),
-                // Main Page Content
                 Expanded(
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
@@ -261,7 +308,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               ),
             ),
       bottomNavigationBar: isDesktop
-          ? null // No bottom bar on desktop
+          ? null
           : NavigationBar(
               selectedIndex: _index,
               onDestinationSelected: (value) => setState(() => _index = value),

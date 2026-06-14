@@ -3,7 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/theme/app_colors.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_routes.dart';
+import '../../core/constants/app_strings.dart';
 import '../../providers/cart_provider.dart';
 import '../../widgets/cart/cart_item_widget.dart';
 import '../../widgets/common/custom_button.dart';
@@ -32,7 +34,7 @@ class CartScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      'Giỏ hàng của bạn đang trống',
+                      AppStrings.cartEmptyMessage,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -41,7 +43,7 @@ class CartScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     const Text(
-                      'Hãy duyệt qua danh mục sản phẩm và lựa chọn những chiếc đồng hồ ưng ý nhé.',
+                      AppStrings.cartEmptySubtitle,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 13,
@@ -53,14 +55,9 @@ class CartScreen extends StatelessWidget {
                       width: 200,
                       child: CustomButton(
                         onPressed: () {
-                          // This is tab index 0 on MainNavigationScreen.
-                          // However, we can simply pop or trigger homepage routing if we want.
-                          // Inside this screen context, since it's hosted in MainNavigationScreen,
-                          // we can't easily change State index of parent, but we can do a push to home or just let user tap bottom bar.
-                          // Actually, navigating to '/home' resets navigation stack and takes them back.
-                          context.go('/home');
+                          context.go(AppRoutes.home);
                         },
-                        label: 'TIẾP TỤC MUA SẮM',
+                        label: AppStrings.continueShoppingButton,
                       ),
                     ),
                   ],
@@ -95,7 +92,6 @@ class CartScreen extends StatelessWidget {
                     ),
                   ),
                   const Divider(height: 24, color: AppColors.border),
-                  // Total summary section
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -145,8 +141,8 @@ class CartScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   CustomButton(
-                    onPressed: () => context.push('/checkout'),
-                    label: 'TIẾN HÀNH THANH TOÁN',
+                    onPressed: () => context.push(AppRoutes.checkout),
+                    label: AppStrings.checkoutButton,
                   ),
                   const SizedBox(height: 8),
                 ],

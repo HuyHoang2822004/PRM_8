@@ -7,9 +7,31 @@ class AuthService {
   Future<bool> login(String email, String password) async {
     await Future.delayed(const Duration(milliseconds: 500));
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_loginKey, true);
-    await prefs.setString(_emailKey, email);
-    return true;
+
+    final cleanEmail = email.trim().toLowerCase();
+    final cleanPassword = password.trim();
+
+    // Default testing account
+    if (cleanEmail == 'admin@chrono.com' && cleanPassword == '123456') {
+      await prefs.setBool(_loginKey, true);
+      await prefs.setString(_emailKey, cleanEmail);
+      if (prefs.getString('user_name') == null) {
+        await prefs.setString('user_name', 'Chrono Admin');
+        await prefs.setString('user_phone', '0909123456');
+        await prefs.setString('user_address', '123 Nguyễn Văn Linh, Quận 7, TP.HCM');
+      }
+      return true;
+    }
+
+    // Registered account check
+    final storedEmail = prefs.getString(_emailKey)?.trim().toLowerCase();
+    final storedPassword = prefs.getString('user_password')?.trim();
+    if (storedEmail != null && storedEmail == cleanEmail && storedPassword == cleanPassword) {
+      await prefs.setBool(_loginKey, true);
+      return true;
+    }
+
+    return false;
   }
 
   Future<bool> register(
@@ -21,10 +43,11 @@ class AuthService {
   ) async {
     await Future.delayed(const Duration(milliseconds: 600));
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_name', name);
-    await prefs.setString('user_phone', phone);
-    await prefs.setString('user_address', address);
-    await prefs.setString(_emailKey, email);
+    await prefs.setString('user_name', name.trim());
+    await prefs.setString('user_phone', phone.trim());
+    await prefs.setString('user_address', address.trim());
+    await prefs.setString(_emailKey, email.trim().toLowerCase());
+    await prefs.setString('user_password', password.trim());
     await prefs.setBool(_loginKey, true);
     return true;
   }
@@ -32,7 +55,6 @@ class AuthService {
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_loginKey, false);
-    await prefs.remove(_emailKey);
   }
 
   Future<bool> checkLogin() async {

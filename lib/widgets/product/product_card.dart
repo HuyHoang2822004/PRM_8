@@ -125,22 +125,23 @@ class ProductCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Row(
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 6,
+                    runSpacing: 2,
                     children: [
                       Text(
                         '${formatter.format(product.activePrice)}đ',
                         style: AppTextStyles.price.copyWith(
-                          fontSize: 14,
+                          fontSize: 13,
                           color: product.hasDiscount ? AppColors.accent : AppColors.primary,
                         ),
                       ),
-                      if (product.hasDiscount) ...[
-                        const SizedBox(width: 6),
+                      if (product.hasDiscount)
                         Text(
                           '${formatter.format(product.price)}đ',
-                          style: AppTextStyles.priceDiscount.copyWith(fontSize: 11),
+                          style: AppTextStyles.priceDiscount.copyWith(fontSize: 10),
                         ),
-                      ]
                     ],
                   ),
                 ],

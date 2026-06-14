@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../constants/app_routes.dart';
 import '../../models/product.dart';
 import '../../providers/auth_provider.dart';
 import '../../screens/auth/login_screen.dart';
@@ -9,15 +10,17 @@ import '../../screens/auth/register_screen.dart';
 import '../../screens/checkout/checkout_screen.dart';
 import '../../screens/home/main_navigation_screen.dart';
 import '../../screens/order/order_success_screen.dart';
+import '../../screens/order/order_history_screen.dart';
+import '../../screens/chat/manager_chat_detail_screen.dart';
 import '../../screens/product/product_detail_screen.dart';
 
 GoRouter createRouter(AuthProvider authProvider) {
   return GoRouter(
-    initialLocation: '/login',
+    initialLocation: AppRoutes.login,
     refreshListenable: authProvider,
     routes: [
       GoRoute(
-        path: '/login',
+        path: AppRoutes.login,
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: const LoginScreen(),
@@ -30,7 +33,7 @@ GoRouter createRouter(AuthProvider authProvider) {
         ),
       ),
       GoRoute(
-        path: '/register',
+        path: AppRoutes.register,
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: const RegisterScreen(),
@@ -46,7 +49,7 @@ GoRouter createRouter(AuthProvider authProvider) {
         ),
       ),
       GoRoute(
-        path: '/home',
+        path: AppRoutes.home,
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: const MainNavigationScreen(),
@@ -59,7 +62,7 @@ GoRouter createRouter(AuthProvider authProvider) {
         ),
       ),
       GoRoute(
-        path: '/checkout',
+        path: AppRoutes.checkout,
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: const CheckoutScreen(),
@@ -75,7 +78,7 @@ GoRouter createRouter(AuthProvider authProvider) {
         ),
       ),
       GoRoute(
-        path: '/product-detail',
+        path: AppRoutes.productDetail,
         pageBuilder: (context, state) {
           final product = state.extra as Product;
           return CustomTransitionPage(
@@ -91,7 +94,7 @@ GoRouter createRouter(AuthProvider authProvider) {
         },
       ),
       GoRoute(
-        path: '/order-success',
+        path: AppRoutes.orderSuccess,
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: const OrderSuccessScreen(),
@@ -106,12 +109,47 @@ GoRouter createRouter(AuthProvider authProvider) {
           },
         ),
       ),
+      GoRoute(
+        path: AppRoutes.orderHistory,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const OrderHistoryScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(1, 0),
+                end: Offset.zero,
+              ).chain(CurveTween(curve: Curves.easeInOutCubic)).animate(animation),
+              child: child,
+            );
+          },
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.managerChatDetail,
+        pageBuilder: (context, state) {
+          final customerEmail = state.extra as String;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: ManagerChatDetailScreen(customerEmail: customerEmail),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeInOutCubic)).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
     ],
     redirect: (context, state) {
       final loggedIn = context.read<AuthProvider>().isLoggedIn;
-      final loggingIn = state.uri.path == '/login' || state.uri.path == '/register';
-      if (!loggedIn && !loggingIn) return '/login';
-      if (loggedIn && loggingIn) return '/home';
+      final loggingIn = state.uri.path == AppRoutes.login || state.uri.path == AppRoutes.register;
+      if (!loggedIn && !loggingIn) return AppRoutes.login;
+      if (loggedIn && loggingIn) return AppRoutes.home;
       return null;
     },
   );

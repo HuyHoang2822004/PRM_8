@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/theme/app_colors.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_routes.dart';
+import '../../core/constants/app_sizes.dart';
+import '../../core/constants/app_strings.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/custom_textfield.dart';
@@ -53,15 +56,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (authProvider.status == AuthStatus.success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Đăng ký tài khoản thành công!'),
+          content: Text(AppStrings.registerSuccess),
           backgroundColor: Colors.green,
         ),
       );
-      context.go('/home');
+      context.go(AppRoutes.home);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authProvider.errorMessage ?? 'Đăng ký không thành công'),
+          content: Text(authProvider.errorMessage ?? AppStrings.registerFailed),
           backgroundColor: AppColors.accent,
         ),
       );
@@ -73,7 +76,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('ĐĂNG KÝ'),
+        title: const Text(AppStrings.registerTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, size: 18),
           onPressed: () => context.pop(),
@@ -81,9 +84,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.paddingLarge,
+            vertical: AppSizes.paddingMedium,
+          ),
           child: Container(
-            constraints: const BoxConstraints(maxWidth: 420),
+            constraints: const BoxConstraints(maxWidth: AppSizes.maxContentWidthRegister),
             child: Consumer<AuthProvider>(
               builder: (_, auth, __) => Form(
                 key: _formKey,
@@ -91,7 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const Text(
-                      'Tạo Tài Khoản Mới',
+                      AppStrings.createAccountPrompt,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -101,20 +107,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 6),
                     const Text(
-                      'Vui lòng điền đầy đủ các thông tin bên dưới để đăng ký thành viên Chrono Luxury',
+                      AppStrings.registerSubtitle,
                       style: TextStyle(
                         fontSize: 13,
                         color: AppColors.textSecondary,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSizes.paddingLarge),
                     CustomTextField(
                       controller: _nameController,
-                      label: 'Họ tên của bạn',
+                      label: AppStrings.fullName,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Vui lòng nhập họ tên';
+                          return AppStrings.validateNameEmpty;
                         }
                         return null;
                       },
@@ -122,15 +128,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 12),
                     CustomTextField(
                       controller: _emailController,
-                      label: 'Địa chỉ Email',
+                      label: AppStrings.emailAddress,
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Vui lòng nhập email';
+                          return AppStrings.validateEmailEmpty;
                         }
                         final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                         if (!emailRegex.hasMatch(value.trim())) {
-                          return 'Email không hợp lệ';
+                          return AppStrings.validateEmailInvalid;
                         }
                         return null;
                       },
@@ -138,15 +144,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 12),
                     CustomTextField(
                       controller: _phoneController,
-                      label: 'Số điện thoại nhận hàng',
+                      label: AppStrings.phoneNumber,
                       keyboardType: TextInputType.phone,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Vui lòng nhập số điện thoại';
+                          return AppStrings.validatePhoneEmpty;
                         }
                         final phoneRegex = RegExp(r'^[0-9]{9,11}$');
                         if (!phoneRegex.hasMatch(value.trim())) {
-                          return 'Số điện thoại không hợp lệ (9-11 số)';
+                          return AppStrings.validatePhoneLength;
                         }
                         return null;
                       },
@@ -154,10 +160,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 12),
                     CustomTextField(
                       controller: _addressController,
-                      label: 'Địa chỉ giao hàng mặc định',
+                      label: AppStrings.address,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Vui lòng nhập địa chỉ nhận hàng';
+                          return AppStrings.validateAddressEmpty;
                         }
                         return null;
                       },
@@ -165,7 +171,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 12),
                     CustomTextField(
                       controller: _passwordController,
-                      label: 'Mật khẩu',
+                      label: AppStrings.password,
                       obscureText: _obscurePassword,
                       suffixIcon: IconButton(
                         onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
@@ -176,10 +182,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Vui lòng nhập mật khẩu';
+                          return AppStrings.validatePasswordEmpty;
                         }
                         if (value.length < 6) {
-                          return 'Mật khẩu phải tối thiểu 6 ký tự';
+                          return AppStrings.validatePasswordLength;
                         }
                         return null;
                       },
@@ -187,7 +193,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 12),
                     CustomTextField(
                       controller: _confirmPasswordController,
-                      label: 'Xác nhận mật khẩu',
+                      label: AppStrings.confirmPassword,
                       obscureText: _obscureConfirm,
                       suffixIcon: IconButton(
                         onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
@@ -198,32 +204,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Vui lòng xác nhận lại mật khẩu';
+                          return AppStrings.validateConfirmPasswordEmpty;
                         }
                         if (value != _passwordController.text) {
-                          return 'Mật khẩu xác nhận không trùng khớp';
+                          return AppStrings.validateConfirmPasswordMismatch;
                         }
                         return null;
                       },
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSizes.paddingLarge),
                     CustomButton(
                       onPressed: _submit,
-                      label: 'ĐĂNG KÝ NGAY',
+                      label: AppStrings.registerButton,
                       isLoading: auth.status == AuthStatus.loading,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSizes.paddingMedium),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text(
-                          'Đã có tài khoản? ',
+                          AppStrings.haveAccountText,
                           style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
                         ),
                         GestureDetector(
                           onTap: () => context.pop(),
                           child: const Text(
-                            'Đăng nhập',
+                            AppStrings.loginNowLink,
                             style: TextStyle(
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,
