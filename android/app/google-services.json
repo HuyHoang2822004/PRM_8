@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "876237732305",
+    "project_id": "watch-app-62e07",
+    "storage_bucket": "watch-app-62e07.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:876237732305:android:b8866376df9312161c48f0",
+        "android_client_info": {
+          "package_name": "com.example.prm_8"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcxTD5Z-mKXA5u0-EOcyFtB-h4jJLPK3M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

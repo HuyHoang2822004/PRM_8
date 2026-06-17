@@ -1,21 +1,35 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Order;
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/order.dart';
 import '../models/cart_item.dart';
 import '../models/product.dart';
 
 class OrderService {
-  static const _ordersKey = 'chrono_orders';
+  OrderService({FirebaseFirestore? firestore, FirebaseAuth? auth})
+      : _firestoreInstance = firestore,
+        _authInstance = auth;
+
+  final FirebaseFirestore? _firestoreInstance;
+  final FirebaseAuth? _authInstance;
+
+  FirebaseFirestore get _firestore => _firestoreInstance ?? FirebaseFirestore.instance;
+  FirebaseAuth get _auth => _authInstance ?? FirebaseAuth.instance;
 
   Future<List<Order>> loadOrders(List<Product> allProducts) async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonStr = prefs.getString(_ordersKey);
-    if (jsonStr == null) return [];
-    
+    final user = _auth.currentUser;
+    if (user == null) return [];
+
     try {
-      final list = json.decode(jsonStr) as List<dynamic>;
-      return list.map((jsonMap) {
-        final itemsList = jsonMap['items'] as List<dynamic>;
+      // Fetch orders for this specific authenticated user
+      final snapshot = await _firestore
+          .collection('orders')
+          .where('userId', isEqualTo: user.uid)
+          .get();
+
+      final list = snapshot.docs.map((doc) {
+        final jsonMap = doc.data();
+        final itemsList = jsonMap['items'] as List<dynamic>? ?? [];
+        
         final items = itemsList.map((itemMap) {
           final pid = itemMap['productId'] as int;
           final prod = allProducts.firstWhere(
@@ -38,42 +52,56 @@ class OrderService {
           );
           return CartItem(
             product: prod,
-            strap: itemMap['strap'] as String,
-            color: itemMap['color'] as String,
-            quantity: itemMap['quantity'] as int,
+            strap: itemMap['strap'] as String? ?? 'Mặc định',
+            color: itemMap['color'] as String? ?? 'Mặc định',
+            quantity: itemMap['quantity'] as int? ?? 1,
           );
         }).toList();
 
+        DateTime dt = DateTime.now();
+        if (jsonMap['createdAt'] != null) {
+          if (jsonMap['createdAt'] is Timestamp) {
+            dt = (jsonMap['createdAt'] as Timestamp).toDate();
+          } else {
+            dt = DateTime.parse(jsonMap['createdAt'].toString());
+          }
+        }
+
         return Order(
-          id: jsonMap['id'] as String,
+          id: jsonMap['id'] as String? ?? doc.id,
           items: items,
-          receiverName: jsonMap['receiverName'] as String,
-          phone: jsonMap['phone'] as String,
-          address: jsonMap['address'] as String,
-          paymentMethod: jsonMap['paymentMethod'] as String,
+          receiverName: jsonMap['receiverName'] as String? ?? '',
+          phone: jsonMap['phone'] as String? ?? '',
+          address: jsonMap['address'] as String? ?? '',
+          paymentMethod: jsonMap['paymentMethod'] as String? ?? '',
           status: jsonMap['status'] as String? ?? 'Chờ duyệt',
-          createdAt: DateTime.parse(jsonMap['createdAt'] as String),
+          createdAt: dt,
         );
       }).toList();
+
+      // Sort locally descending to avoid requiring composite indexes on Firestore
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return list;
     } catch (_) {
       return [];
     }
   }
 
   Future<Order> createOrder(Order order) async {
-    await Future.delayed(const Duration(milliseconds: 600));
-    final prefs = await SharedPreferences.getInstance();
-    final jsonStr = prefs.getString(_ordersKey);
-    final List<dynamic> list = jsonStr != null ? json.decode(jsonStr) as List<dynamic> : [];
-    
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('Người dùng chưa đăng nhập');
+    }
+
     final orderMap = {
       'id': order.id,
+      'userId': user.uid,
       'receiverName': order.receiverName,
       'phone': order.phone,
       'address': order.address,
       'paymentMethod': order.paymentMethod,
       'status': order.status,
-      'createdAt': order.createdAt.toIso8601String(),
+      'createdAt': Timestamp.fromDate(order.createdAt),
       'items': order.items.map((item) => {
         'productId': item.product.id,
         'strap': item.strap,
@@ -81,9 +109,8 @@ class OrderService {
         'quantity': item.quantity,
       }).toList(),
     };
-    
-    list.insert(0, orderMap);
-    await prefs.setString(_ordersKey, json.encode(list));
+
+    await _firestore.collection('orders').doc(order.id).set(orderMap);
     return order;
   }
 }

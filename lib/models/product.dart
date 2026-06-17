@@ -52,4 +52,23 @@ class Product {
       colors: (json['colors'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'brand': brand,
+      'price': price,
+      'salePrice': salePrice,
+      'image': image,
+      'description': description,
+      'strapMaterial': strapMaterial,
+      'movement': movement,
+      'waterResistance': waterResistance,
+      'warranty': warranty,
+      'stock': stock,
+      'straps': straps,
+      'colors': colors,
+    };
+  }
 }
