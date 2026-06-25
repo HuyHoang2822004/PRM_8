@@ -15,6 +15,8 @@ import '../chat/chat_screen.dart';
 import '../map/map_screen.dart';
 import '../notification/notification_screen.dart';
 import '../product/product_list_screen.dart';
+import '../admin/admin_order_list_screen.dart';
+import '../admin/admin_product_list_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -62,10 +64,23 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final myEmail = auth.userProfile['email'] ?? 'guest';
     final isManager = myEmail == 'admin@chrono.com';
 
+    final managerPages = const [
+      ChatScreen(),
+      AdminOrderListScreen(),
+      AdminProductListScreen(),
+    ];
+
+    final managerTitles = const [
+      'TIN NHẮN KHÁCH HÀNG',
+      'QUẢN LÝ ĐƠN HÀNG',
+      'QUẢN LÝ SẢN PHẨM',
+    ];
+
     if (isManager) {
+      final activeIndex = _index >= managerPages.length ? 0 : _index;
       return Scaffold(
         appBar: AppBar(
-          title: const Text('TIN NHẮN KHÁCH HÀNG'),
+          title: Text(managerTitles[activeIndex]),
           elevation: 1,
           actions: [
             IconButton(
@@ -80,7 +95,28 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             const SizedBox(width: 8),
           ],
         ),
-        body: const ChatScreen(),
+        body: managerPages[activeIndex],
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: activeIndex,
+          onDestinationSelected: (value) => setState(() => _index = value),
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.chat_bubble_outline),
+              selectedIcon: Icon(Icons.chat_bubble, color: AppColors.primary),
+              label: 'Tin nhắn',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.receipt_long_outlined),
+              selectedIcon: Icon(Icons.receipt_long, color: AppColors.primary),
+              label: 'Đơn hàng',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.watch_outlined),
+              selectedIcon: Icon(Icons.watch, color: AppColors.primary),
+              label: 'Sản phẩm',
+            ),
+          ],
+        ),
       );
     }
 
@@ -151,13 +187,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       appBar: AppBar(
         title: Text(_titles[_index]),
         elevation: 0,
-        actions: [
-          IconButton(
-            onPressed: () => context.push(AppRoutes.checkout),
-            icon: cartIcon,
-            tooltip: AppStrings.checkoutTitle,
-          ),
-          const SizedBox(width: 8),
+        actions: const [
+          SizedBox(width: 8),
         ],
       ),
       drawer: Drawer(

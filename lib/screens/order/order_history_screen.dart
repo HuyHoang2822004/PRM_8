@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../providers/order_provider.dart';
+import '../../providers/product_provider.dart';
 
 class OrderHistoryScreen extends StatelessWidget {
   const OrderHistoryScreen({super.key});
@@ -80,7 +81,7 @@ class OrderHistoryScreen extends StatelessWidget {
                     statusBgColor = Colors.blue.shade50;
                     statusTextColor = Colors.blue.shade700;
                     break;
-                  case 'Đã giao':
+                  case 'Hoàn thành':
                     statusBgColor = Colors.green.shade50;
                     statusTextColor = Colors.green.shade700;
                     break;
@@ -279,6 +280,26 @@ class OrderHistoryScreen extends StatelessWidget {
                             ),
                           ],
                         ),
+                        if (order.status == 'Chờ duyệt') ...[
+                          const Divider(height: 24),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 38,
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.redAccent,
+                                side: const BorderSide(color: Colors.redAccent),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              icon: const Icon(Icons.cancel_outlined, size: 16),
+                              label: const Text(
+                                'Hủy đơn hàng',
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
+                              onPressed: () => _cancelOrder(context, order.id),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -286,5 +307,50 @@ class OrderHistoryScreen extends StatelessWidget {
               },
             ),
     );
+  }
+
+  Future<void> _cancelOrder(BuildContext context, String orderId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Xác nhận hủy'),
+        content: const Text('Bạn có chắc chắn muốn hủy đơn hàng này không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Đóng'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Hủy đơn'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final productProvider = context.read<ProductProvider>();
+      final success = await context.read<OrderProvider>().updateOrderStatus(
+        orderId,
+        'Đã hủy',
+        productProvider.products,
+      );
+
+      if (context.mounted) {
+        if (success) {
+          await productProvider.loadProducts();
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Đã hủy đơn hàng thành công!')),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Không thể hủy đơn hàng, vui lòng thử lại!')),
+          );
+        }
+      }
+    }
   }
 }

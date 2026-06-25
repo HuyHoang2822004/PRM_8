@@ -13,7 +13,11 @@
     "warranty": "5 Years",
     "stock": 2,
     "straps": ["Oystersteel", "Rubber B"],
-    "colors": ["Green", "Black"]
+    "colors": ["Green", "Black"],
+    "images": [
+      "https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=800",
+      "https://images.unsplash.com/photo-1622434641406-a158123450f9?w=800"
+    ]
   },
   {
     "id": 2,
@@ -29,7 +33,12 @@
     "warranty": "1 Year",
     "stock": 15,
     "straps": ["Resin Strap", "Metal Custom Strap"],
-    "colors": ["Black", "Red", "Grey"]
+    "colors": ["Black", "Red", "Grey"],
+    "images": [
+      "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=800",
+      "https://images.unsplash.com/photo-1600003014755-ba31aa59c4b6?w=800",
+      "https://images.unsplash.com/photo-1533139502658-0198f920d8e8?w=800"
+    ]
   },
   {
     "id": 3,
@@ -45,7 +54,11 @@
     "warranty": "2 Years",
     "stock": 5,
     "straps": ["Black Leather", "Brown Leather"],
-    "colors": ["Silver Dial", "Blue Dial"]
+    "colors": ["Silver Dial", "Blue Dial"],
+    "images": [
+      "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=800",
+      "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=800"
+    ]
   },
   {
     "id": 4,
@@ -61,7 +74,11 @@
     "warranty": "3 Years",
     "stock": 8,
     "straps": ["Polyurethane Band", "Nylon Nato Strap"],
-    "colors": ["Blue Dial", "Black Dial"]
+    "colors": ["Blue Dial", "Black Dial"],
+    "images": [
+      "https://images.unsplash.com/photo-1539874754764-5a96559165b0?w=800",
+      "https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?w=800"
+    ]
   },
   {
     "id": 5,
@@ -77,7 +94,11 @@
     "warranty": "2 Years",
     "stock": 4,
     "straps": ["Steel Mesh", "Black Leather Strap"],
-    "colors": ["Silver Case", "Rose Gold Case"]
+    "colors": ["Silver Case", "Rose Gold Case"],
+    "images": [
+      "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "https://images.unsplash.com/photo-1517462964-21fdcec3f25b?w=800"
+    ]
   },
   {
     "id": 6,
@@ -93,6 +114,91 @@
     "warranty": "1 Year",
     "stock": 20,
     "straps": ["Sport Band", "Nike Sport Loop", "Milanese Loop"],
-    "colors": ["Midnight", "Starlight", "Silver"]
+    "colors": ["Midnight", "Starlight", "Silver"],
+    "images": [
+      "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=800",
+      "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=800",
+      "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=800"
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Hublot Classic Fusion Titanium",
+    "brand": "Hublot",
+    "price": 250000000,
+    "salePrice": 240000000,
+    "image": "https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=800",
+    "description": "Hublot Classic Fusion Titanium features a sleek satin-finished titanium case and clean minimalist design.",
+    "strapMaterial": "Rubber",
+    "movement": "Automatic",
+    "waterResistance": "5ATM (50m)",
+    "warranty": "2 Years",
+    "stock": 3,
+    "straps": ["Black Rubber", "Grey Crocodile Leather"],
+    "colors": ["Titanium", "Black"],
+    "images": [
+      "https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=800",
+      "https://images.unsplash.com/photo-1622434641406-a158123450f9?w=800"
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Omega Speedmaster Moonwatch",
+    "brand": "Omega",
+    "price": 180000000,
+    "salePrice": 175000000,
+    "image": "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=800",
+    "description": "The Omega Speedmaster is one of OMEGA's most iconic timepieces, having been a part of all six lunar missions.",
+    "strapMaterial": "Stainless Steel",
+    "movement": "Manual winding (3861)",
+    "waterResistance": "5ATM (50m)",
+    "warranty": "5 Years",
+    "stock": 4,
+    "straps": ["Steel Bracelet", "Nato Strap", "Leather Strap"],
+    "colors": ["Steel Dial", "Black Dial"],
+    "images": [
+      "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=800",
+      "https://images.unsplash.com/photo-1539874754764-5a96559165b0?w=800"
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Longines Master Collection",
+    "brand": "Longines",
+    "price": 85000000,
+    "salePrice": null,
+    "image": "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+    "description": "Elegant moonphase chronograph with a silver barleycorn pattern dial and blue steel hands.",
+    "strapMaterial": "Alligator Leather",
+    "movement": "Automatic (L687)",
+    "waterResistance": "3ATM (30m)",
+    "warranty": "2 Years",
+    "stock": 6,
+    "straps": ["Brown Alligator", "Black Alligator"],
+    "colors": ["Silver Dial", "Black Dial"],
+    "images": [
+      "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=800",
+      "https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=800"
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Hamilton Khaki Field Auto",
+    "brand": "Hamilton",
+    "price": 18500000,
+    "salePrice": 17200000,
+    "image": "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=800",
+    "description": "The Khaki Field Auto is a rugged military-inspired watch, boasting a beautiful dark dial with high legibility.",
+    "strapMaterial": "Canvas",
+    "movement": "Automatic (H-10)",
+    "waterResistance": "10ATM (100m)",
+    "warranty": "2 Years",
+    "stock": 10,
+    "straps": ["Green Canvas", "Brown Leather"],
+    "colors": ["Green Dial", "Black Dial"],
+    "images": [
+      "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=800",
+      "https://images.unsplash.com/photo-1539874754764-5a96559165b0?w=800"
+    ]
   }
 ]

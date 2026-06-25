@@ -27,6 +27,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   String? selectedStrap;
   String? selectedColor;
   int quantity = 1;
+  int activeImageIndex = 0;
 
   @override
   void initState() {
@@ -36,6 +37,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
     if (widget.product.colors.isNotEmpty) {
       selectedColor = widget.product.colors.first;
+      final idx = widget.product.colors.indexOf(selectedColor!);
+      activeImageIndex = idx >= 0 ? idx : 0;
     }
   }
 
@@ -74,8 +77,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ProductImageSlider(
-              imageUrl: widget.product.image,
+              images: widget.product.images ?? [widget.product.image],
               productId: widget.product.id,
+              selectedIndex: activeImageIndex,
             ),
             const Divider(height: 1, color: AppColors.border),
             Padding(
@@ -93,12 +97,28 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   StrapSelector(
                     straps: widget.product.straps,
                     selectedStrap: selectedStrap,
-                    onSelected: (strap) => setState(() => selectedStrap = strap),
+                    onSelected: (strap) {
+                      setState(() {
+                        selectedStrap = strap;
+                        final idx = widget.product.straps.indexOf(strap);
+                        if (idx >= 0 && idx < (widget.product.images?.length ?? 0)) {
+                          activeImageIndex = idx;
+                        }
+                      });
+                    },
                   ),
                   ColorSelector(
                     colors: widget.product.colors,
                     selectedColor: selectedColor,
-                    onSelected: (color) => setState(() => selectedColor = color),
+                    onSelected: (color) {
+                      setState(() {
+                        selectedColor = color;
+                        final idx = widget.product.colors.indexOf(color);
+                        if (idx >= 0 && idx < (widget.product.images?.length ?? 0)) {
+                          activeImageIndex = idx;
+                        }
+                      });
+                    },
                   ),
                   QuantitySelector(
                     quantity: quantity,

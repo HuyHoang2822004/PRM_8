@@ -13,6 +13,9 @@ import '../../screens/order/order_success_screen.dart';
 import '../../screens/order/order_history_screen.dart';
 import '../../screens/chat/manager_chat_detail_screen.dart';
 import '../../screens/product/product_detail_screen.dart';
+import '../../screens/admin/admin_order_detail_screen.dart';
+import '../../screens/admin/admin_product_edit_screen.dart';
+import '../../models/order.dart';
 
 GoRouter createRouter(AuthProvider authProvider) {
   return GoRouter(
@@ -132,6 +135,44 @@ GoRouter createRouter(AuthProvider authProvider) {
           return CustomTransitionPage(
             key: state.pageKey,
             child: ManagerChatDetailScreen(customerEmail: customerEmail),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeInOutCubic)).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.adminOrderDetail,
+        pageBuilder: (context, state) {
+          final order = state.extra as Order;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: AdminOrderDetailScreen(order: order),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeInOutCubic)).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.adminProductEdit,
+        pageBuilder: (context, state) {
+          final product = state.extra as Product?;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: AdminProductEditScreen(product: product),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(

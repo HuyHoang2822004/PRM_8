@@ -14,6 +14,7 @@ class Product {
     required this.stock,
     required this.straps,
     required this.colors,
+    this.images,
   });
 
   final int id;
@@ -30,18 +31,20 @@ class Product {
   final int stock;
   final List<String> straps;
   final List<String> colors;
+  final List<String>? images;
 
   int get activePrice => salePrice ?? price;
   bool get hasDiscount => salePrice != null && salePrice! < price;
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    final mainImage = json['image'] as String;
     return Product(
       id: json['id'] as int,
       name: json['name'] as String,
       brand: json['brand'] as String,
       price: json['price'] as int,
       salePrice: json['salePrice'] as int?,
-      image: json['image'] as String,
+      image: mainImage,
       description: json['description'] as String? ?? '',
       strapMaterial: json['strapMaterial'] as String? ?? '',
       movement: json['movement'] as String? ?? '',
@@ -50,6 +53,7 @@ class Product {
       stock: json['stock'] as int? ?? 0,
       straps: (json['straps'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
       colors: (json['colors'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      images: (json['images'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [mainImage],
     );
   }
 
@@ -69,6 +73,7 @@ class Product {
       'stock': stock,
       'straps': straps,
       'colors': colors,
+      'images': images ?? [image],
     };
   }
 }

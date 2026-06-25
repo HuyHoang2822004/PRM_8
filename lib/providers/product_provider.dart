@@ -82,4 +82,34 @@ class ProductProvider extends ChangeNotifier {
     }).toList();
     notifyListeners();
   }
+
+  Future<bool> addProduct(Product product) async {
+    try {
+      await _productService.addProduct(product);
+      await loadProducts();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> updateProduct(Product product) async {
+    try {
+      await _productService.updateProduct(product);
+      await loadProducts();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> deleteProduct(int id) async {
+    try {
+      await _productService.deleteProduct(id);
+      await loadProducts();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 }

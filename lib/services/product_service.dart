@@ -16,8 +16,8 @@ class ProductService {
       // 1. Fetch from Firestore
       final snapshot = await _firestore.collection('products').get();
 
-      // 2. Auto-seed if database is empty
-      if (snapshot.docs.isEmpty) {
+      // 2. Auto-seed if database is empty or missing expanded catalog
+      if (snapshot.docs.length < 10) {
         final jsonString = await rootBundle.loadString(AppAssets.productsJson);
         final data = json.decode(jsonString) as List<dynamic>;
         final List<Product> localProducts = data
@@ -53,5 +53,17 @@ class ProductService {
           .map((e) => Product.fromJson(e as Map<String, dynamic>))
           .toList();
     }
+  }
+
+  Future<void> addProduct(Product product) async {
+    await _firestore.collection('products').doc(product.id.toString()).set(product.toJson());
+  }
+
+  Future<void> updateProduct(Product product) async {
+    await _firestore.collection('products').doc(product.id.toString()).update(product.toJson());
+  }
+
+  Future<void> deleteProduct(int id) async {
+    await _firestore.collection('products').doc(id.toString()).delete();
   }
 }
