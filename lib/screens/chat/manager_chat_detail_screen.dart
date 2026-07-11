@@ -22,6 +22,7 @@ class _ManagerChatDetailScreenState extends State<ManagerChatDetailScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ChatProvider>().startListeningToMessages();
       _scrollToBottom(isDelayed: true);
     });
   }

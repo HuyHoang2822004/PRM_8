@@ -1,26 +1,58 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/message.dart';
 
 class ChatService {
-  static const _chatKey = 'chrono_chat_messages';
+  ChatService({FirebaseFirestore? firestore}) : _firestoreInstance = firestore;
 
-  Future<List<Message>> loadPersistedMessages() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonStr = prefs.getString(_chatKey);
-    if (jsonStr == null) return [];
-    try {
-      final list = json.decode(jsonStr) as List<dynamic>;
-      return list.map((m) => Message.fromJson(m as Map<String, dynamic>)).toList();
-    } catch (_) {
-      return [];
-    }
+  final FirebaseFirestore? _firestoreInstance;
+  FirebaseFirestore get _firestore => _firestoreInstance ?? FirebaseFirestore.instance;
+
+  // Stream of all messages ordered by timestamp ascending
+  Stream<List<Message>> getMessagesStream() {
+    return _firestore
+        .collection('messages')
+        .orderBy('timestamp', descending: false)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        
+        DateTime dt = DateTime.now();
+        if (data['timestamp'] != null) {
+          if (data['timestamp'] is Timestamp) {
+            dt = (data['timestamp'] as Timestamp).toDate();
+          } else {
+            dt = DateTime.parse(data['timestamp'].toString());
+          }
+        }
+
+        return Message(
+          id: data['id'] as String? ?? doc.id,
+          senderEmail: data['senderEmail'] as String? ?? '',
+          receiverEmail: data['receiverEmail'] as String? ?? '',
+          content: data['content'] as String? ?? '',
+          timestamp: dt,
+          isFromUser: data['isFromUser'] as bool? ?? true,
+        );
+      }).toList();
+    });
   }
 
-  Future<void> savePersistedMessages(List<Message> messages) async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonStr = json.encode(messages.map((m) => m.toJson()).toList());
-    await prefs.setString(_chatKey, jsonStr);
+  // Save single message to Firestore
+  Future<void> sendMessage(Message message) async {
+    try {
+      await _firestore.collection('messages').doc(message.id).set({
+        'id': message.id,
+        'senderEmail': message.senderEmail,
+        'receiverEmail': message.receiverEmail,
+        'content': message.content,
+        'timestamp': Timestamp.fromDate(message.timestamp),
+        'isFromUser': message.isFromUser,
+      });
+    } catch (e) {
+      print('DEBUG: Lỗi gửi tin nhắn lên Firestore: $e');
+      rethrow;
+    }
   }
 
   Future<String> autoReply(String userMessage) async {

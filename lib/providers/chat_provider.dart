@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../models/message.dart';
@@ -8,37 +9,44 @@ class ChatProvider extends ChangeNotifier {
 
   final ChatService _chatService;
   final List<Message> _allMessages = [];
+  StreamSubscription<List<Message>>? _streamSubscription;
 
   List<Message> get allMessages => List.unmodifiable(_allMessages);
 
   Future<void> loadAllMessages() async {
-    final persisted = await _chatService.loadPersistedMessages();
-    _allMessages.clear();
-    _allMessages.addAll(persisted);
-    
-    // Seed message if empty for demo purposes
-    if (_allMessages.isEmpty) {
-      _allMessages.addAll([
-        Message(
+    startListeningToMessages();
+  }
+
+  void startListeningToMessages() {
+    if (_streamSubscription != null) return;
+    _streamSubscription = _chatService.getMessagesStream().listen((messagesList) async {
+      _allMessages.clear();
+      _allMessages.addAll(messagesList);
+      
+      // Seed message if empty for demo purposes
+      if (_allMessages.isEmpty) {
+        final seed1 = Message(
           id: 'msg_seed_1',
           senderEmail: 'khachhang@test.com',
           receiverEmail: 'admin@chrono.com',
           content: 'Xin chào shop! Shop có mẫu Rolex Submariner còn hàng không ạ?',
           timestamp: DateTime.now().subtract(const Duration(minutes: 10)),
           isFromUser: true,
-        ),
-        Message(
+        );
+        final seed2 = Message(
           id: 'msg_seed_2',
           senderEmail: 'admin@chrono.com',
           receiverEmail: 'khachhang@test.com',
           content: 'Dạ chào bạn, mẫu Rolex Submariner hiện đang còn hàng sẵn tại showroom 123 Nguyễn Văn Linh ạ.',
           timestamp: DateTime.now().subtract(const Duration(minutes: 9)),
           isFromUser: false,
-        ),
-      ]);
-      await _chatService.savePersistedMessages(_allMessages);
-    }
-    notifyListeners();
+        );
+        await _chatService.sendMessage(seed1);
+        await _chatService.sendMessage(seed2);
+      }
+      
+      notifyListeners();
+    });
   }
 
   List<Message> getConversation(String customerEmail) {
@@ -52,10 +60,10 @@ class ChatProvider extends ChangeNotifier {
   List<String> getActiveChats() {
     final Set<String> emails = {};
     for (final m in _allMessages) {
-      if (m.senderEmail != 'admin@chrono.com') {
+      if (m.senderEmail != 'admin@chrono.com' && m.senderEmail.isNotEmpty) {
         emails.add(m.senderEmail);
       }
-      if (m.receiverEmail != 'admin@chrono.com') {
+      if (m.receiverEmail != 'admin@chrono.com' && m.receiverEmail.isNotEmpty) {
         emails.add(m.receiverEmail);
       }
     }
@@ -88,23 +96,7 @@ class ChatProvider extends ChangeNotifier {
       isFromUser: true,
     );
 
-    _allMessages.add(newMsg);
-    await _chatService.savePersistedMessages(_allMessages);
-    notifyListeners();
-
-    // Trigger auto reply
-    final replyText = await _chatService.autoReply(content);
-    final botMsg = Message(
-      id: 'msg_bot_${DateTime.now().millisecondsSinceEpoch}',
-      senderEmail: 'admin@chrono.com',
-      receiverEmail: customerEmail,
-      content: replyText,
-      timestamp: DateTime.now(),
-      isFromUser: false,
-    );
-    _allMessages.add(botMsg);
-    await _chatService.savePersistedMessages(_allMessages);
-    notifyListeners();
+    await _chatService.sendMessage(newMsg);
   }
 
   Future<void> sendMessageFromManager(String customerEmail, String content) async {
@@ -119,9 +111,7 @@ class ChatProvider extends ChangeNotifier {
       isFromUser: false,
     );
 
-    _allMessages.add(newMsg);
-    await _chatService.savePersistedMessages(_allMessages);
-    notifyListeners();
+    await _chatService.sendMessage(newMsg);
   }
 
   // Deprecated methods mapping to prevent breaks
@@ -135,5 +125,11 @@ class ChatProvider extends ChangeNotifier {
 
   Future<void> sendMessage(String text) async {
     await sendMessageFromCustomer('guest', text);
+  }
+
+  @override
+  void dispose() {
+    _streamSubscription?.cancel();
+    super.dispose();
   }
 }
