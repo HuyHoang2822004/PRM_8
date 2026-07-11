@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/constants/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../models/cart_item.dart';
@@ -29,55 +31,66 @@ class CartItemWidget extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            // Product Image
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: CachedNetworkImage(
-                imageUrl: item.product.image,
-                width: 80,
-                height: 80,
-                fit: BoxFit.cover,
-                errorWidget: (_, __, ___) => Container(
-                  width: 80,
-                  height: 80,
-                  color: Colors.grey.shade100,
-                  child: const Icon(Icons.image_not_supported),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            // Product Details
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.product.brand.toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                      color: AppColors.textSecondary,
+              child: InkWell(
+                onTap: () {
+                  context.push(AppRoutes.productDetail, extra: item.product);
+                },
+                child: Row(
+                  children: [
+                    // Product Image
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: CachedNetworkImage(
+                        imageUrl: item.product.image,
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                        errorWidget: (_, __, ___) => Container(
+                          width: 80,
+                          height: 80,
+                          color: Colors.grey.shade100,
+                          child: const Icon(Icons.image_not_supported),
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    item.product.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.subtitle.copyWith(fontSize: 14),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Dây: ${item.strap}  |  Màu: ${item.color}',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '${formatter.format(item.product.activePrice)}đ',
-                    style: AppTextStyles.price.copyWith(fontSize: 14),
-                  ),
-                ],
+                    const SizedBox(width: 16),
+                    // Product Details
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.product.brand.toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            item.product.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.subtitle.copyWith(fontSize: 14),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Dây: ${item.strap}  |  Màu: ${item.color}',
+                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            '${formatter.format(item.product.activePrice)}đ',
+                            style: AppTextStyles.price.copyWith(fontSize: 14),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             // Quantity Actions & Remove

@@ -49,8 +49,7 @@ class ProductInfoSection extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               '${formatter.format(activePrice)}đ',
@@ -65,6 +64,22 @@ class ProductInfoSection extends StatelessWidget {
               Text(
                 '${formatter.format(price)}đ',
                 style: AppTextStyles.priceDiscount.copyWith(fontSize: 14),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
+                decoration: BoxDecoration(
+                  color: Colors.redAccent.shade400,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  '-${((price - salePrice!) / price * 100).round()}%',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ],
           ],

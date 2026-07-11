@@ -9,6 +9,9 @@ class SpecsTable extends StatelessWidget {
   final String waterResistance;
   final String warranty;
   final int stock;
+  final List<String>? colors;
+  final List<String>? straps;
+  final Map<String, String>? customSpecs;
 
   const SpecsTable({
     super.key,
@@ -18,16 +21,25 @@ class SpecsTable extends StatelessWidget {
     required this.waterResistance,
     required this.warranty,
     required this.stock,
+    this.colors,
+    this.straps,
+    this.customSpecs,
   });
 
   @override
   Widget build(BuildContext context) {
     final isOutOfStock = stock == 0;
+    final activeColors = colors;
+    final activeStraps = straps;
     
     final specs = [
       {'label': AppStrings.specsBrand, 'value': brand},
       {'label': AppStrings.specsMovement, 'value': movement},
       {'label': AppStrings.specsStrap, 'value': strapMaterial},
+      if (activeStraps != null && activeStraps.isNotEmpty)
+        {'label': 'Loại dây đeo', 'value': activeStraps.join(', ')},
+      if (activeColors != null && activeColors.isNotEmpty)
+        {'label': 'Màu sắc', 'value': activeColors.join(', ')},
       {'label': AppStrings.specsWater, 'value': waterResistance},
       {'label': AppStrings.specsWarranty, 'value': warranty},
       {
@@ -35,6 +47,12 @@ class SpecsTable extends StatelessWidget {
         'value': isOutOfStock ? AppStrings.outOfStockText : '${AppStrings.inStockText} ($stock chiếc)'
       },
     ];
+
+    if (customSpecs != null) {
+      customSpecs!.forEach((key, val) {
+        specs.add({'label': key, 'value': val});
+      });
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../models/product.dart';
 import '../../providers/cart_provider.dart';
@@ -52,8 +53,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Đã thêm $quantity chiếc ${widget.product.name} vào giỏ hàng!'),
-        backgroundColor: Colors.green,
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Đã thêm $quantity chiếc ${widget.product.name} vào giỏ hàng!',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.green.shade600,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -71,6 +85,47 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           icon: const Icon(Icons.arrow_back_ios_new, size: 18),
           onPressed: () => context.pop(),
         ),
+        actions: [
+          IconButton(
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(Icons.shopping_bag_outlined),
+                Consumer<CartProvider>(
+                  builder: (context, cart, child) {
+                    if (cart.totalQuantity == 0) return const SizedBox();
+                    return Positioned(
+                      right: -6,
+                      top: -6,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: AppColors.accent,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          '${cart.totalQuantity}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            onPressed: () => context.go('${AppRoutes.home}?tab=1'),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -133,6 +188,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     waterResistance: widget.product.waterResistance,
                     warranty: widget.product.warranty,
                     stock: widget.product.stock,
+                    colors: widget.product.colors,
+                    straps: widget.product.straps,
+                    customSpecs: widget.product.customSpecs,
                   ),
                   const SizedBox(height: 32),
                   CustomButton(

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../models/product.dart';
@@ -18,6 +19,35 @@ class ProductProvider extends ChangeNotifier {
   bool onlyInStock = false;
   double? maxPriceLimit;
 
+  StreamSubscription<List<Product>>? _productsSubscription;
+
+  void listenToProducts() {
+    _productsSubscription?.cancel();
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    _productsSubscription = _productService.getProductsStream().listen((list) async {
+      isLoading = false;
+      if (list.length < 10) {
+        await loadProducts();
+        return;
+      }
+      _allProducts = list;
+      _applyFilters();
+    }, onError: (_) {
+      isLoading = false;
+      errorMessage = 'Không thể tải danh sách đồng hồ';
+      notifyListeners();
+    });
+  }
+
+  @override
+  void dispose() {
+    _productsSubscription?.cancel();
+    super.dispose();
+  }
+
   Future<void> loadProducts() async {
     isLoading = true;
     errorMessage = null;
@@ -30,6 +60,14 @@ class ProductProvider extends ChangeNotifier {
     } finally {
       isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Product? getProductById(int id) {
+    try {
+      return _allProducts.firstWhere((p) => p.id == id);
+    } catch (_) {
+      return null;
     }
   }
 

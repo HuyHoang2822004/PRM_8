@@ -2,9 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme/app_colors.dart';
-import '../../widgets/common/custom_button.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -35,114 +35,30 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  void _showNavigationInstructions() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      barrierColor: Colors.black.withOpacity(0.5),
-      transitionAnimationController: AnimationController(
-        vsync: Navigator.of(context),
-        duration: const Duration(milliseconds: 350),
-      ),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-      ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.navigation_rounded, color: AppColors.accent),
-                const SizedBox(width: 8),
-                const Text(
-                  'Chỉ đường tới Chrono Luxury',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.textPrimary, letterSpacing: 0.5),
-                ),
-                const Spacer(),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close, color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-            const Divider(color: AppColors.border, height: 24),
-            const SizedBox(height: 8),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.05),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.directions_car_rounded, color: AppColors.primary, size: 20),
-                ),
-                const SizedBox(width: 16),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Tuyến đường chính', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                      SizedBox(height: 2),
-                      Text(
-                        'Đi theo Nguyễn Văn Linh qua ngã tư Nguyễn Hữu Thọ khoảng 500m. Cửa hàng nằm phía tay phải.',
-                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.05),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.local_parking_rounded, color: Colors.blue, size: 20),
-                ),
-                const SizedBox(width: 16),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Đỗ xe', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                      SizedBox(height: 2),
-                      Text(
-                        'Hỗ trợ đỗ xe ô tô và xe máy miễn phí, có nhân viên bảo vệ trông giữ trước cửa hàng.',
-                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 28),
-            CustomButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _copyAddress();
-              },
-              label: 'SAO CHÉP ĐỊA CHỈ & MỞ BẢN ĐỒ',
-            ),
-            const SizedBox(height: 12),
-          ],
-        ),
-      ),
-    );
-  }
+  Future<void> _openMap() async {
+    const lat = 10.72967;
+    const lng = 106.72198;
+    
+    final googleMapsUrl = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+    final appleMapsUrl = Uri.parse('https://maps.apple.com/?q=$lat,$lng');
 
+    try {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        if (await canLaunchUrl(appleMapsUrl)) {
+          await launchUrl(appleMapsUrl, mode: LaunchMode.externalApplication);
+          return;
+        }
+      }
+      
+      if (await canLaunchUrl(googleMapsUrl)) {
+        await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Could not launch map';
+      }
+    } catch (_) {
+      _copyAddress();
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -308,10 +224,9 @@ class _MapScreenState extends State<MapScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               elevation: 0,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
+                                  borderRadius: BorderRadius.circular(8)),
                             ),
-                            onPressed: _showNavigationInstructions,
+                            onPressed: _openMap,
                             icon: const Icon(Icons.navigation_rounded, size: 16),
                             label: const Text(
                               'Chỉ đường',

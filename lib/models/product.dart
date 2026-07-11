@@ -15,6 +15,7 @@ class Product {
     required this.straps,
     required this.colors,
     this.images,
+    this.customSpecs,
   });
 
   final int id;
@@ -32,6 +33,7 @@ class Product {
   final List<String> straps;
   final List<String> colors;
   final List<String>? images;
+  final Map<String, String>? customSpecs;
 
   int get activePrice => salePrice ?? price;
   bool get hasDiscount => salePrice != null && salePrice! < price;
@@ -54,6 +56,9 @@ class Product {
       straps: (json['straps'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
       colors: (json['colors'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
       images: (json['images'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [mainImage],
+      customSpecs: (json['customSpecs'] as Map<String, dynamic>?)
+              ?.map((k, v) => MapEntry(k, v.toString())) ??
+          {},
     );
   }
 
@@ -74,6 +79,7 @@ class Product {
       'straps': straps,
       'colors': colors,
       'images': images ?? [image],
+      'customSpecs': customSpecs ?? {},
     };
   }
 }

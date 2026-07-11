@@ -66,4 +66,17 @@ class ProductService {
   Future<void> deleteProduct(int id) async {
     await _firestore.collection('products').doc(id.toString()).delete();
   }
+
+  Stream<List<Product>> getProductsStream() {
+    return _firestore.collection('products').snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        try {
+          return Product.fromJson(doc.data());
+        } catch (e) {
+          print('Error parsing product ID ${doc.id}: $e');
+          return null;
+        }
+      }).whereType<Product>().toList();
+    });
+  }
 }

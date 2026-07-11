@@ -14,6 +14,20 @@ class AdminProductEditScreen extends StatefulWidget {
   State<AdminProductEditScreen> createState() => _AdminProductEditScreenState();
 }
 
+class CustomSpecRow {
+  final TextEditingController keyController;
+  final TextEditingController valController;
+
+  CustomSpecRow({required String key, required String value})
+      : keyController = TextEditingController(text: key),
+        valController = TextEditingController(text: value);
+
+  void dispose() {
+    keyController.dispose();
+    valController.dispose();
+  }
+}
+
 class _AdminProductEditScreenState extends State<AdminProductEditScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isSaving = false;
@@ -22,15 +36,16 @@ class _AdminProductEditScreenState extends State<AdminProductEditScreen> {
   late TextEditingController _brandController;
   late TextEditingController _priceController;
   late TextEditingController _salePriceController;
-  late TextEditingController _imageController;
   late TextEditingController _stockController;
   late TextEditingController _descController;
   late TextEditingController _movementController;
   late TextEditingController _strapMatController;
   late TextEditingController _waterResController;
   late TextEditingController _warrantyController;
-  late TextEditingController _strapsController;
-  late TextEditingController _colorsController;
+  late TextEditingController _colorController;
+  late TextEditingController _strapController;
+  final List<TextEditingController> _imageControllers = [];
+  final List<CustomSpecRow> _customSpecs = [];
 
   @override
   void initState() {
@@ -43,17 +58,41 @@ class _AdminProductEditScreenState extends State<AdminProductEditScreen> {
     _salePriceController = TextEditingController(
       text: prod?.salePrice != null ? prod!.salePrice.toString() : '',
     );
-    _imageController = TextEditingController(text: prod?.image ?? '');
     _stockController = TextEditingController(text: prod?.stock != null ? prod!.stock.toString() : '10');
     _descController = TextEditingController(text: prod?.description ?? '');
     _movementController = TextEditingController(text: prod?.movement ?? 'Automatic');
     _strapMatController = TextEditingController(text: prod?.strapMaterial ?? 'Leather');
     _waterResController = TextEditingController(text: prod?.waterResistance ?? '5ATM (50m)');
     _warrantyController = TextEditingController(text: prod?.warranty ?? '2 Years');
+    _colorController = TextEditingController(
+      text: (prod != null && prod.colors.isNotEmpty) ? prod.colors.first : '',
+    );
+    _strapController = TextEditingController(
+      text: (prod != null && prod.straps.isNotEmpty) ? prod.straps.first : '',
+    );
     
-    // Join lists to comma-separated text
-    _strapsController = TextEditingController(text: prod?.straps.join(', ') ?? 'Mặc định');
-    _colorsController = TextEditingController(text: prod?.colors.join(', ') ?? 'Mặc định');
+    if (prod != null && prod.images != null && prod.images!.isNotEmpty) {
+      for (final img in prod.images!) {
+        _imageControllers.add(TextEditingController(text: img));
+      }
+    } else if (prod?.image != null && prod!.image.isNotEmpty) {
+      _imageControllers.add(TextEditingController(text: prod.image));
+    }
+    
+    if (_imageControllers.isEmpty) {
+      _imageControllers.add(TextEditingController());
+    }
+
+    if (prod != null && prod.customSpecs != null && prod.customSpecs!.isNotEmpty) {
+      prod.customSpecs!.forEach((key, val) {
+        _customSpecs.add(CustomSpecRow(key: key, value: val));
+      });
+    } else {
+      _customSpecs.add(CustomSpecRow(key: 'Giới tính', value: ''));
+      _customSpecs.add(CustomSpecRow(key: 'Kính đồng hồ', value: ''));
+      _customSpecs.add(CustomSpecRow(key: 'Đường kính mặt', value: ''));
+      _customSpecs.add(CustomSpecRow(key: 'Tính năng nổi bật', value: ''));
+    }
   }
 
   @override
@@ -62,15 +101,20 @@ class _AdminProductEditScreenState extends State<AdminProductEditScreen> {
     _brandController.dispose();
     _priceController.dispose();
     _salePriceController.dispose();
-    _imageController.dispose();
     _stockController.dispose();
     _descController.dispose();
     _movementController.dispose();
     _strapMatController.dispose();
     _waterResController.dispose();
     _warrantyController.dispose();
-    _strapsController.dispose();
-    _colorsController.dispose();
+    _colorController.dispose();
+    _strapController.dispose();
+    for (final ctrl in _imageControllers) {
+      ctrl.dispose();
+    }
+    for (final row in _customSpecs) {
+      row.dispose();
+    }
     super.dispose();
   }
 
@@ -80,22 +124,32 @@ class _AdminProductEditScreenState extends State<AdminProductEditScreen> {
     setState(() => _isSaving = true);
     final provider = context.read<ProductProvider>();
 
-    // Parse comma separated values
-    final straps = _strapsController.text
-        .split(',')
-        .map((s) => s.trim())
-        .where((s) => s.isNotEmpty)
-        .toList();
-    final colors = _colorsController.text
-        .split(',')
-        .map((c) => c.trim())
-        .where((c) => c.isNotEmpty)
-        .toList();
-
     final price = int.parse(_priceController.text.trim());
     final salePriceText = _salePriceController.text.trim();
     final salePrice = salePriceText.isNotEmpty ? int.parse(salePriceText) : null;
     final stock = int.parse(_stockController.text.trim());
+
+    final List<String> colors = [_colorController.text.trim()];
+    final List<String> straps = [_strapController.text.trim()];
+    final List<String> images = [];
+
+    for (final ctrl in _imageControllers) {
+      final url = ctrl.text.trim();
+      if (url.isNotEmpty) {
+        images.add(url);
+      }
+    }
+
+    final mainImage = images.isNotEmpty ? images.first : '';
+
+    final Map<String, String> customSpecs = {};
+    for (final row in _customSpecs) {
+      final key = row.keyController.text.trim();
+      final val = row.valController.text.trim();
+      if (key.isNotEmpty && val.isNotEmpty) {
+        customSpecs[key] = val;
+      }
+    }
 
     bool success = false;
 
@@ -113,7 +167,7 @@ class _AdminProductEditScreenState extends State<AdminProductEditScreen> {
         brand: _brandController.text.trim(),
         price: price,
         salePrice: salePrice,
-        image: _imageController.text.trim(),
+        image: mainImage,
         description: _descController.text.trim(),
         strapMaterial: _strapMatController.text.trim(),
         movement: _movementController.text.trim(),
@@ -122,6 +176,8 @@ class _AdminProductEditScreenState extends State<AdminProductEditScreen> {
         stock: stock,
         straps: straps,
         colors: colors,
+        images: images,
+        customSpecs: customSpecs,
       );
 
       success = await provider.addProduct(newProduct);
@@ -133,7 +189,7 @@ class _AdminProductEditScreenState extends State<AdminProductEditScreen> {
         brand: _brandController.text.trim(),
         price: price,
         salePrice: salePrice,
-        image: _imageController.text.trim(),
+        image: mainImage,
         description: _descController.text.trim(),
         strapMaterial: _strapMatController.text.trim(),
         movement: _movementController.text.trim(),
@@ -142,6 +198,8 @@ class _AdminProductEditScreenState extends State<AdminProductEditScreen> {
         stock: stock,
         straps: straps,
         colors: colors,
+        images: images,
+        customSpecs: customSpecs,
       );
 
       success = await provider.updateProduct(updatedProduct);
@@ -300,11 +358,24 @@ class _AdminProductEditScreenState extends State<AdminProductEditScreen> {
                               ],
                             ),
                             const SizedBox(height: 12),
-                            _buildTextField(
-                              controller: _imageController,
-                              label: 'Link hình ảnh (URL)',
-                              maxLines: 2,
-                              validator: (val) => val == null || val.trim().isEmpty ? 'Vui lòng nhập link ảnh' : null,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildTextField(
+                                    controller: _colorController,
+                                    label: 'Màu sắc (Ví dụ: Đen)',
+                                    validator: (val) => val == null || val.trim().isEmpty ? 'Yêu cầu điền màu' : null,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _buildTextField(
+                                    controller: _strapController,
+                                    label: 'Loại dây đeo (Ví dụ: Dây nhựa)',
+                                    validator: (val) => val == null || val.trim().isEmpty ? 'Yêu cầu điền loại dây' : null,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -312,8 +383,73 @@ class _AdminProductEditScreenState extends State<AdminProductEditScreen> {
                     ),
                     const SizedBox(height: 16),
 
+                    // Detailed Options and Images Section
+                    _buildSectionHeader('DANH SÁCH HÌNH ẢNH SẢN PHẨM'),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 4, bottom: 12),
+                      child: Text(
+                        'Bạn có thể nhập nhiều link hình ảnh cho sản phẩm này. Ô đầu tiên sẽ là Ảnh chính đại diện của sản phẩm.',
+                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4),
+                      ),
+                    ),
+                    Column(
+                      children: List.generate(_imageControllers.length, (index) {
+                        final controller = _imageControllers[index];
+                        final isMain = index == 0;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: _buildTextField(
+                                  controller: controller,
+                                  label: isMain ? 'Link hình ảnh chính (Bắt buộc)' : 'Link hình ảnh phụ #${index}',
+                                  maxLines: 2,
+                                  validator: isMain
+                                      ? (val) => val == null || val.trim().isEmpty ? 'Yêu cầu nhập link ảnh chính' : null
+                                      : null,
+                                ),
+                              ),
+                              if (!isMain) ...[
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                                  onPressed: () {
+                                    setState(() {
+                                      _imageControllers[index].dispose();
+                                      _imageControllers.removeAt(index);
+                                    });
+                                  },
+                                ),
+                              ],
+                            ],
+                          ),
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 4),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: const BorderSide(color: AppColors.primary),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _imageControllers.add(TextEditingController());
+                          });
+                        },
+                        icon: const Icon(Icons.add_photo_alternate_outlined, size: 18),
+                        label: const Text('THÊM HÌNH ẢNH MỚI', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
                     // Technical Specifications section
-                    _buildSectionHeader('THÔNG SỐ KỸ THUẬT & PHÂN LOẠI'),
+                    _buildSectionHeader('THÔNG SỐ KỸ THUẬT SẢN PHẨM'),
                     Card(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       child: Padding(
@@ -351,17 +487,79 @@ class _AdminProductEditScreenState extends State<AdminProductEditScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 12),
-                            _buildTextField(
-                              controller: _colorsController,
-                              label: 'Các màu vỏ (phân cách bằng dấu phẩy)',
-                              helperText: 'VD: Titanium, Gold, Black',
-                            ),
-                            const SizedBox(height: 12),
-                            _buildTextField(
-                              controller: _strapsController,
-                              label: 'Các loại dây thay thế (phân cách bằng dấu phẩy)',
-                              helperText: 'VD: Sport Band, Leather Loop',
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Custom Specs Section
+                    _buildSectionHeader('THÔNG SỐ TÙY CHỈNH BỔ SUNG (GIỚI TÍNH, MẶT KÍNH, TÍNH NĂNG...)'),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 4, bottom: 8),
+                      child: Text(
+                        'Bạn có thể tự do thêm bớt các thông số tùy chỉnh khác cho sản phẩm này (Ví dụ: Giới tính, Chất liệu mặt kính, Chức năng đặc biệt).',
+                        style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary, height: 1.4),
+                      ),
+                    ),
+                    Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          children: [
+                            ...List.generate(_customSpecs.length, (index) {
+                              final row = _customSpecs[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 4,
+                                      child: _buildTextField(
+                                        controller: row.keyController,
+                                        label: 'Tên thông số (VD: Giới tính)',
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      flex: 5,
+                                      child: _buildTextField(
+                                        controller: row.valController,
+                                        label: 'Giá trị (VD: Unisex)',
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                                      onPressed: () {
+                                        setState(() {
+                                          _customSpecs[index].dispose();
+                                          _customSpecs.removeAt(index);
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
+                            const SizedBox(height: 4),
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: AppColors.primary,
+                                  side: const BorderSide(color: AppColors.primary),
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _customSpecs.add(CustomSpecRow(key: '', value: ''));
+                                  });
+                                },
+                                icon: const Icon(Icons.add, size: 16),
+                                label: const Text('THÊM THÔNG SỐ KHÁC', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+                              ),
                             ),
                           ],
                         ),

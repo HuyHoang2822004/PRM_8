@@ -19,14 +19,15 @@ import '../admin/admin_order_list_screen.dart';
 import '../admin/admin_product_list_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
-  const MainNavigationScreen({super.key});
+  final int initialIndex;
+  const MainNavigationScreen({super.key, this.initialIndex = 0});
 
   @override
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  int _index = 0;
+  late int _index;
 
   final _pages = const [
     ProductListScreen(),
@@ -47,15 +48,29 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   void initState() {
     super.initState();
+    _index = widget.initialIndex;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final productProvider = context.read<ProductProvider>();
-      if (productProvider.products.isEmpty) {
-        await productProvider.loadProducts();
-      }
+      productProvider.listenToProducts();
       if (mounted) {
-        context.read<OrderProvider>().fetchOrders(productProvider.products);
+        final myEmail = context.read<AuthProvider>().userProfile['email'] ?? 'guest';
+        final isManager = myEmail == 'admin@chrono.com';
+        
+        final orderProvider = context.read<OrderProvider>();
+        orderProvider.listenToOrders(productProvider.products);
+        if (isManager) {
+          orderProvider.listenToAllOrders(productProvider.products);
+        }
       }
     });
+  }
+
+  @override
+  void didUpdateWidget(MainNavigationScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialIndex != widget.initialIndex) {
+      _index = widget.initialIndex;
+    }
   }
 
   @override

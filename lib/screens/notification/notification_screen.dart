@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/constants/app_routes.dart';
 import '../../core/theme/app_colors.dart';
+import '../../models/notification.dart';
 import '../../providers/notification_provider.dart';
+import '../../providers/product_provider.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -16,13 +20,29 @@ class _NotificationScreenState extends State<NotificationScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<NotificationProvider>().loadNotifications();
+      context.read<NotificationProvider>().listenToNotifications();
     });
   }
 
-  void _showNotificationDetail(BuildContext context, dynamic item) {
+  void _handleNotificationTap(BuildContext context, AppNotification item) {
     // Mark as read
     context.read<NotificationProvider>().markAsRead(item.id);
+
+    if (item.type == 'new_product' && item.relatedId is int) {
+      final product = context.read<ProductProvider>().getProductById(item.relatedId as int);
+      if (product != null) {
+        context.push(AppRoutes.productDetail, extra: product);
+        return;
+      }
+    } else if (item.type == 'order_confirmed' ||
+        item.type == 'order_shipping' ||
+        item.type == 'order_completed') {
+      context.push(AppRoutes.orderHistory);
+      return;
+    } else if (item.type == 'store') {
+      context.go('${AppRoutes.home}?tab=3');
+      return;
+    }
 
     showDialog(
       context: context,
@@ -163,7 +183,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       ),
                     ],
                   ),
-                  onTap: () => _showNotificationDetail(context, item),
+                  onTap: () => _handleNotificationTap(context, item),
                 ),
               );
             },

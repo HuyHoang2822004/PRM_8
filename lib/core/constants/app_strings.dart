@@ -84,8 +84,8 @@ class AppStrings {
   
   // Product Detail
   static const String productIntro = "GIỚI THIỆU SẢN PHẨM";
-  static const String strapVariant = "CHỌN LOẠI DÂY ĐEO";
-  static const String colorVariant = "CHỌN MÀU SẮC VỎ / MẶT";
+  static const String strapVariant = "CHẤT LIỆU DÂY ĐEO";
+  static const String colorVariant = "MÀU SẮC";
   static const String buyQuantity = "SỐ LƯỢNG MUA";
   static const String specsTitle = "THÔNG SỐ KỸ THUẬT";
   static const String specsBrand = "Thương hiệu";

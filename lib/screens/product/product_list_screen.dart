@@ -28,7 +28,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProductProvider>().loadProducts();
+      context.read<ProductProvider>().listenToProducts();
     });
   }
 
@@ -49,7 +49,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: RefreshIndicator(
-        onRefresh: () => context.read<ProductProvider>().loadProducts(),
+        onRefresh: () async => context.read<ProductProvider>().listenToProducts(),
         color: AppColors.primary,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
