@@ -3,10 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../models/product.dart';
 import '../../providers/cart_provider.dart';
+import '../../providers/chat_provider.dart';
 import '../../widgets/common/custom_button.dart';
 import 'widgets/color_selector.dart';
 import 'widgets/product_image_slider.dart';
@@ -69,7 +69,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           label: 'XEM GIỎ HÀNG',
           textColor: Colors.white,
           onPressed: () {
-            context.go('${AppRoutes.home}?tab=1');
+            context.read<ChatProvider>().requestTab(1);
+            if (context.canPop()) {
+              context.pop();
+            }
           },
         ),
         backgroundColor: Colors.green.shade600,
@@ -129,7 +132,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ),
               ],
             ),
-            onPressed: () => context.go('${AppRoutes.home}?tab=1'),
+            onPressed: () {
+              context.read<ChatProvider>().requestTab(1);
+              if (context.canPop()) {
+                context.pop();
+              }
+            },
           ),
           const SizedBox(width: 8),
         ],

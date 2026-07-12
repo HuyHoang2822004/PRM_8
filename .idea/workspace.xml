@@ -6,12 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="dbcf3c31-74b8-4ffb-93a7-517655698769" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/providers/chat_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/chat_provider.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/chat/chat_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/chat/chat_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/chat/manager_chat_detail_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/chat/manager_chat_detail_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/home/main_navigation_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/home/main_navigation_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/notification/notification_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/notification/notification_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/services/storage_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/storage_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/product/product_detail_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/product/product_detail_screen.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
