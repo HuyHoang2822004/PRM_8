@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../providers/chat_provider.dart';
@@ -17,12 +18,17 @@ class ManagerChatDetailScreen extends StatefulWidget {
 class _ManagerChatDetailScreenState extends State<ManagerChatDetailScreen> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
+  ChatProvider? _chatProvider;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ChatProvider>().startListeningToMessages();
+      _chatProvider = context.read<ChatProvider>();
+      _chatProvider!.setCurrentUserEmail('admin@chrono.com');
+      _chatProvider!.isChatOpen = true;
+      _chatProvider!.startListeningToMessages();
+      _chatProvider!.markManagerChatAsRead(widget.customerEmail);
       _scrollToBottom(isDelayed: true);
     });
   }
@@ -31,6 +37,7 @@ class _ManagerChatDetailScreenState extends State<ManagerChatDetailScreen> {
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
+    _chatProvider?.isChatOpen = false;
     super.dispose();
   }
 
@@ -47,6 +54,55 @@ class _ManagerChatDetailScreenState extends State<ManagerChatDetailScreen> {
     });
   }
 
+  int _messageCount = 0;
+
+  List<Widget> _buildMessageListItems(List<dynamic> conversation) {
+    final List<Widget> items = [];
+    DateTime? lastDate;
+
+    for (final msg in conversation) {
+      final msgDate = DateTime(msg.timestamp.year, msg.timestamp.month, msg.timestamp.day);
+      if (lastDate == null || msgDate != lastDate) {
+        lastDate = msgDate;
+        items.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Row(
+              children: [
+                Expanded(child: Divider(color: Colors.grey.shade300, thickness: 0.5)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(
+                    DateFormat('dd/MM/yyyy').format(msg.timestamp),
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade500,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                Expanded(child: Divider(color: Colors.grey.shade300, thickness: 0.5)),
+              ],
+            ),
+          ),
+        );
+      }
+
+      final sentByManager = msg.senderEmail == 'admin@chrono.com';
+      items.add(
+        ChatBubble(
+          key: ValueKey(msg.id),
+          message: msg.content,
+          isFromUser: sentByManager,
+          timestamp: msg.timestamp,
+        ),
+      );
+    }
+
+    return items;
+  }
+
   Future<void> _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
@@ -61,6 +117,13 @@ class _ManagerChatDetailScreenState extends State<ManagerChatDetailScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<ChatProvider>();
     final conversation = provider.getConversation(widget.customerEmail);
+
+    if (conversation.length > _messageCount) {
+      _messageCount = conversation.length;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToBottom(isDelayed: true);
+      });
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -97,19 +160,10 @@ class _ManagerChatDetailScreenState extends State<ManagerChatDetailScreen> {
 
           // Conversation List
           Expanded(
-            child: ListView.builder(
+            child: ListView(
               controller: _scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-              itemCount: conversation.length,
-              itemBuilder: (context, index) {
-                final msg = conversation[index];
-                // For the manager, manager's replies (from admin@chrono.com) are on the right (isFromUser = true)
-                final sentByManager = msg.senderEmail == 'admin@chrono.com';
-                return ChatBubble(
-                  message: msg.content,
-                  isFromUser: sentByManager,
-                );
-              },
+              children: _buildMessageListItems(conversation),
             ),
           ),
 

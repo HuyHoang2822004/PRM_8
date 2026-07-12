@@ -16,6 +16,8 @@ import 'services/chat_service.dart';
 import 'services/order_service.dart';
 import 'services/product_service.dart';
 
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -42,6 +44,7 @@ class MyApp extends StatelessWidget {
         builder: (context) {
           final router = createRouter(context.watch<AuthProvider>());
           return MaterialApp.router(
+            scaffoldMessengerKey: scaffoldMessengerKey,
             debugShowCheckedModeBanner: false,
             title: 'Chrono Luxury',
             theme: AppTheme.lightTheme,

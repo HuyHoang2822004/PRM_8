@@ -91,6 +91,7 @@ class AuthService {
           'email': data['email']?.toString() ?? user.email ?? '',
           'phone': data['phone']?.toString() ?? '',
           'address': data['address']?.toString() ?? '',
+          'avatarUrl': data['avatarUrl']?.toString() ?? '',
         };
       }
     } catch (_) {
@@ -102,6 +103,29 @@ class AuthService {
       'email': user.email ?? '',
       'phone': '',
       'address': '',
+      'avatarUrl': '',
     };
+  }
+
+  Future<bool> updateUserProfile({
+    required String name,
+    required String phone,
+    required String address,
+    String? avatarUrl,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+    try {
+      await _firestore.collection('users').doc(user.uid).set({
+        'name': name,
+        'phone': phone,
+        'address': address,
+        'email': user.email ?? '',
+        if (avatarUrl != null) 'avatarUrl': avatarUrl,
+      }, SetOptions(merge: true));
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 }

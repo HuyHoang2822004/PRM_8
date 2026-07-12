@@ -1,14 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../providers/order_provider.dart';
 import '../../providers/product_provider.dart';
 
 class OrderHistoryScreen extends StatelessWidget {
   const OrderHistoryScreen({super.key});
+
+  String _getPaymentMethodDisplay(String method) {
+    if (method == 'COD') {
+      return 'Thanh toán khi nhận hàng (COD)';
+    } else if (method == 'Bank Transfer' || method.toLowerCase().contains('chuyển khoản')) {
+      return 'Chuyển khoản Ngân hàng (Đã chuyển khoản)';
+    } else if (method.startsWith('Online')) {
+      final provider = method.replaceAll('Online', '').replaceAll('(', '').replaceAll(')', '').trim();
+      if (provider.isNotEmpty) {
+        return 'Thanh toán trực tuyến ($provider - Đã thanh toán)';
+      }
+      return 'Thanh toán trực tuyến (Đã thanh toán)';
+    }
+    return method;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,11 +120,14 @@ class OrderHistoryScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     side: const BorderSide(color: AppColors.border, width: 0.5),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => context.push(AppRoutes.orderDetail, extra: order),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                         // Header: Order ID & Status
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -234,28 +254,30 @@ class OrderHistoryScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Phương thức thanh toán',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: AppColors.textSecondary,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Phương thức thanh toán',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.textSecondary,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  order.paymentMethod == 'COD'
-                                      ? 'Nhận hàng (COD)'
-                                      : 'Chuyển khoản TCB',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textPrimary,
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _getPaymentMethodDisplay(order.paymentMethod),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
@@ -303,7 +325,8 @@ class OrderHistoryScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                );
+                ),
+              );
               },
             ),
     );

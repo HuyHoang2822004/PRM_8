@@ -11,8 +11,11 @@ import '../../screens/checkout/checkout_screen.dart';
 import '../../screens/home/main_navigation_screen.dart';
 import '../../screens/order/order_success_screen.dart';
 import '../../screens/order/order_history_screen.dart';
+import '../../screens/order/order_detail_screen.dart';
+import '../../screens/auth/edit_profile_screen.dart';
 import '../../screens/chat/manager_chat_detail_screen.dart';
 import '../../screens/product/product_detail_screen.dart';
+import '../../screens/notification/notification_screen.dart';
 import '../../screens/admin/admin_order_detail_screen.dart';
 import '../../screens/admin/admin_product_edit_screen.dart';
 import '../../models/order.dart';
@@ -72,6 +75,22 @@ GoRouter createRouter(AuthProvider authProvider) {
         },
       ),
       GoRoute(
+        path: AppRoutes.notification,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const NotificationScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 1),
+                end: Offset.zero,
+              ).chain(CurveTween(curve: Curves.easeInOutCubic)).animate(animation),
+              child: child,
+            );
+          },
+        ),
+      ),
+      GoRoute(
         path: AppRoutes.checkout,
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
@@ -119,11 +138,46 @@ GoRouter createRouter(AuthProvider authProvider) {
           },
         ),
       ),
-      GoRoute(
+       GoRoute(
         path: AppRoutes.orderHistory,
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: const OrderHistoryScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(1, 0),
+                end: Offset.zero,
+              ).chain(CurveTween(curve: Curves.easeInOutCubic)).animate(animation),
+              child: child,
+            );
+          },
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.orderDetail,
+        pageBuilder: (context, state) {
+          final order = state.extra as Order;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: OrderDetailScreen(order: order),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeInOutCubic)).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.editProfile,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const EditProfileScreen(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return SlideTransition(
               position: Tween<Offset>(

@@ -49,5 +49,9 @@
 	<string>Ứng dụng cần truy cập vị trí của bạn để hiển thị vị trí trên bản đồ và chỉ đường tới cửa hàng.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Ứng dụng cần truy cập vị trí của bạn để hiển thị vị trí trên bản đồ và chỉ đường tới cửa hàng.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Ứng dụng cần truy cập thư viện ảnh để bạn có thể chọn ảnh đại diện hoặc tải ảnh sản phẩm.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Ứng dụng cần truy cập máy ảnh để chụp ảnh đại diện hoặc chụp ảnh sản phẩm mới.</string>
 </dict>
 </plist>

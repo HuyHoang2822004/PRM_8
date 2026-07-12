@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/product_provider.dart';
 import '../../models/product.dart';
+import '../../services/storage_service.dart';
 
 class AdminProductEditScreen extends StatefulWidget {
   const AdminProductEditScreen({super.key, this.product});
@@ -116,6 +117,41 @@ class _AdminProductEditScreenState extends State<AdminProductEditScreen> {
       row.dispose();
     }
     super.dispose();
+  }
+
+  bool _isUploadingImage = false;
+
+  Future<void> _uploadProductImage(int index) async {
+    final picker = StorageService();
+    final imageFile = await picker.pickImage();
+    if (imageFile == null) return;
+
+    setState(() {
+      _isUploadingImage = true;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Đang tải ảnh lên Cloud Storage...'), duration: Duration(seconds: 1)),
+    );
+
+    final path = 'products/${DateTime.now().millisecondsSinceEpoch}_$index.jpg';
+    final downloadUrl = await picker.uploadImage(file: imageFile, path: path);
+
+    if (mounted) {
+      setState(() {
+        _isUploadingImage = false;
+      });
+      if (downloadUrl != null) {
+        _imageControllers[index].text = downloadUrl;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Tải ảnh sản phẩm lên thành công!'), backgroundColor: Colors.green),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Tải ảnh lên thất bại, vui lòng thử lại!'), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
 
   Future<void> _saveProduct() async {
@@ -409,6 +445,12 @@ class _AdminProductEditScreenState extends State<AdminProductEditScreen> {
                                       ? (val) => val == null || val.trim().isEmpty ? 'Yêu cầu nhập link ảnh chính' : null
                                       : null,
                                 ),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.cloud_upload_outlined, color: AppColors.primary),
+                                tooltip: 'Tải ảnh từ điện thoại',
+                                onPressed: () => _uploadProductImage(index),
                               ),
                               if (!isMain) ...[
                                 const SizedBox(width: 8),

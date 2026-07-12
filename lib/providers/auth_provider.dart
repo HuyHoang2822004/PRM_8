@@ -69,4 +69,29 @@ class AuthProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  Future<bool> updateProfile({
+    required String name,
+    required String phone,
+    required String address,
+    String? avatarUrl,
+  }) async {
+    status = AuthStatus.loading;
+    notifyListeners();
+
+    final ok = await _authService.updateUserProfile(
+      name: name,
+      phone: phone,
+      address: address,
+      avatarUrl: avatarUrl,
+    );
+    if (ok) {
+      userProfile = await _authService.getUserProfile();
+      status = AuthStatus.success;
+    } else {
+      status = AuthStatus.error;
+    }
+    notifyListeners();
+    return ok;
+  }
 }

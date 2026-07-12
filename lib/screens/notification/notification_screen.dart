@@ -7,6 +7,7 @@ import '../../core/theme/app_colors.dart';
 import '../../models/notification.dart';
 import '../../providers/notification_provider.dart';
 import '../../providers/product_provider.dart';
+import '../../providers/order_provider.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -28,19 +29,37 @@ class _NotificationScreenState extends State<NotificationScreen> {
     // Mark as read
     context.read<NotificationProvider>().markAsRead(item.id);
 
-    if (item.type == 'new_product' && item.relatedId is int) {
-      final product = context.read<ProductProvider>().getProductById(item.relatedId as int);
-      if (product != null) {
-        context.push(AppRoutes.productDetail, extra: product);
-        return;
+    if (item.type == 'new_product') {
+      int? prodId;
+      if (item.relatedId is int) {
+        prodId = item.relatedId as int;
+      } else if (item.relatedId != null) {
+        prodId = int.tryParse(item.relatedId.toString());
+      }
+      if (prodId != null) {
+        final product = context.read<ProductProvider>().getProductById(prodId);
+        if (product != null) {
+          context.push(AppRoutes.productDetail, extra: product);
+          return;
+        }
       }
     } else if (item.type == 'order_confirmed' ||
         item.type == 'order_shipping' ||
         item.type == 'order_completed') {
-      context.push(AppRoutes.orderHistory);
+      final orderId = item.relatedId?.toString() ?? '';
+      final ordersList = context.read<OrderProvider>().orders;
+      final idx = ordersList.indexWhere((o) => o.id == orderId);
+      if (idx != -1) {
+        context.push(AppRoutes.orderDetail, extra: ordersList[idx]);
+      } else {
+        context.push(AppRoutes.orderHistory);
+      }
       return;
     } else if (item.type == 'store') {
       context.go('${AppRoutes.home}?tab=3');
+      return;
+    } else if (item.type == 'chat') {
+      context.go('${AppRoutes.home}?tab=4');
       return;
     }
 
@@ -88,6 +107,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: const Text(
+          'THÔNG BÁO',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: AppColors.textPrimary),
+          onPressed: () => context.pop(),
+        ),
+        elevation: 1,
+        backgroundColor: Colors.white,
+      ),
       body: Consumer<NotificationProvider>(
         builder: (_, provider, __) {
           if (provider.notifications.isEmpty) {

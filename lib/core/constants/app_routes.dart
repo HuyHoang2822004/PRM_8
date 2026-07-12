@@ -6,7 +6,10 @@ class AppRoutes {
   static const String productDetail = '/product-detail';
   static const String orderSuccess = '/order-success';
   static const String orderHistory = '/order-history';
+  static const String orderDetail = '/order-detail';
+  static const String editProfile = '/edit-profile';
   static const String managerChatDetail = '/manager-chat-detail';
   static const String adminOrderDetail = '/admin-order-detail';
   static const String adminProductEdit = '/admin-product-edit';
+  static const String notification = '/notification';
 }

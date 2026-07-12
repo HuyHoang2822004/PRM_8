@@ -10,10 +10,10 @@ import '../../providers/cart_provider.dart';
 import '../../providers/notification_provider.dart';
 import '../../providers/product_provider.dart';
 import '../../providers/order_provider.dart';
+import '../../providers/chat_provider.dart';
 import '../cart/cart_screen.dart';
 import '../chat/chat_screen.dart';
 import '../map/map_screen.dart';
-import '../notification/notification_screen.dart';
 import '../product/product_list_screen.dart';
 import '../admin/admin_order_list_screen.dart';
 import '../admin/admin_product_list_screen.dart';
@@ -32,7 +32,6 @@ class MainNavigationScreenState extends State<MainNavigationScreen> {
   final _pages = const [
     ProductListScreen(),
     CartScreen(),
-    NotificationScreen(),
     MapScreen(),
     ChatScreen(),
   ];
@@ -40,7 +39,6 @@ class MainNavigationScreenState extends State<MainNavigationScreen> {
   final _titles = const [
     AppStrings.homeTitle,
     AppStrings.cartTitle,
-    AppStrings.notificationTitle,
     AppStrings.mapTitle,
     AppStrings.chatTitle,
   ];
@@ -48,13 +46,19 @@ class MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   void initState() {
     super.initState();
-    _index = widget.initialIndex;
+    _index = _normalizeTabIndex(widget.initialIndex);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final productProvider = context.read<ProductProvider>();
       productProvider.listenToProducts();
       if (mounted) {
         final myEmail = context.read<AuthProvider>().userProfile['email'] ?? 'guest';
         final isManager = myEmail == 'admin@chrono.com';
+
+        final chatProvider = context.read<ChatProvider>();
+        chatProvider.setCurrentUserEmail(myEmail);
+        chatProvider.startListeningToMessages();
+        
+        context.read<NotificationProvider>().listenToNotifications();
         
         final orderProvider = context.read<OrderProvider>();
         orderProvider.listenToOrders(productProvider.products);
@@ -68,9 +72,17 @@ class MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   void didUpdateWidget(MainNavigationScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_index != widget.initialIndex) {
-      _index = widget.initialIndex;
+    final normalized = _normalizeTabIndex(widget.initialIndex);
+    if (_index != normalized) {
+      _index = normalized;
     }
+  }
+
+  int _normalizeTabIndex(int index) {
+    if (index == 4) return 3;
+    if (index == 3) return 2;
+    if (index == 2) return 0; // Default back to Home if they try to access notification tab
+    return index;
   }
 
   void setTabIndex(int index) {
@@ -84,6 +96,13 @@ class MainNavigationScreenState extends State<MainNavigationScreen> {
     final auth = context.watch<AuthProvider>();
     final myEmail = auth.userProfile['email'] ?? 'guest';
     final isManager = myEmail == 'admin@chrono.com';
+    final chatProvider = context.watch<ChatProvider>();
+
+    if (myEmail != 'guest' && myEmail.isNotEmpty && chatProvider.currentUserEmail != myEmail) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        chatProvider.setCurrentUserEmail(myEmail);
+      });
+    }
 
     final managerPages = const [
       ChatScreen(),
@@ -120,18 +139,26 @@ class MainNavigationScreenState extends State<MainNavigationScreen> {
         bottomNavigationBar: NavigationBar(
           selectedIndex: activeIndex,
           onDestinationSelected: (value) => setState(() => _index = value),
-          destinations: const [
+          destinations: [
             NavigationDestination(
-              icon: Icon(Icons.chat_bubble_outline),
-              selectedIcon: Icon(Icons.chat_bubble, color: AppColors.primary),
+              icon: chatProvider.unreadChatsForManager.isNotEmpty
+                  ? const Badge(
+                      child: Icon(Icons.chat_bubble_outline),
+                    )
+                  : const Icon(Icons.chat_bubble_outline),
+              selectedIcon: chatProvider.unreadChatsForManager.isNotEmpty
+                  ? const Badge(
+                      child: Icon(Icons.chat_bubble, color: AppColors.primary),
+                    )
+                  : const Icon(Icons.chat_bubble, color: AppColors.primary),
               label: 'Tin nhắn',
             ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: Icon(Icons.receipt_long_outlined),
               selectedIcon: Icon(Icons.receipt_long, color: AppColors.primary),
               label: 'Đơn hàng',
             ),
-            NavigationDestination(
+            const NavigationDestination(
               icon: Icon(Icons.watch_outlined),
               selectedIcon: Icon(Icons.watch, color: AppColors.primary),
               label: 'Sản phẩm',
@@ -208,8 +235,14 @@ class MainNavigationScreenState extends State<MainNavigationScreen> {
       appBar: AppBar(
         title: Text(_titles[_index]),
         elevation: 0,
-        actions: const [
-          SizedBox(width: 8),
+        actions: [
+          IconButton(
+            icon: notifyIcon,
+            onPressed: () {
+              context.push(AppRoutes.notification);
+            },
+          ),
+          const SizedBox(width: 8),
         ],
       ),
       drawer: Drawer(
@@ -224,14 +257,31 @@ class MainNavigationScreenState extends State<MainNavigationScreen> {
                 ),
                 currentAccountPicture: CircleAvatar(
                   backgroundColor: AppColors.accent.withOpacity(0.9),
-                  child: Text(
-                    auth.userProfile['name']?.substring(0, 1).toUpperCase() ?? 'K',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
+                  backgroundImage: auth.userProfile['avatarUrl'] != null && auth.userProfile['avatarUrl']!.isNotEmpty
+                      ? NetworkImage(auth.userProfile['avatarUrl']!)
+                      : null,
+                  child: auth.userProfile['avatarUrl'] == null || auth.userProfile['avatarUrl']!.isEmpty
+                      ? Text(
+                          auth.userProfile['name']?.substring(0, 1).toUpperCase() ?? 'K',
+                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                        )
+                      : null,
                 ),
-                accountName: Text(
-                  auth.userProfile['name'] ?? AppStrings.customer,
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                accountName: Row(
+                  children: [
+                    Text(
+                      auth.userProfile['name'] ?? AppStrings.customer,
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.push(AppRoutes.editProfile);
+                      },
+                      child: const Icon(Icons.edit_outlined, size: 16, color: Colors.white70),
+                    ),
+                  ],
                 ),
                 accountEmail: Text(
                   auth.userProfile['email'] ?? AppStrings.notLoggedIn,
@@ -248,7 +298,12 @@ class MainNavigationScreenState extends State<MainNavigationScreen> {
                 ListTile(
                   leading: const Icon(Icons.location_on_outlined, color: AppColors.primary),
                   title: const Text(AppStrings.addressLabel, style: TextStyle(fontSize: 12, color: Colors.grey)),
-                  subtitle: Text(auth.userProfile['address']!, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                  subtitle: Text(
+                    auth.userProfile['address']!,
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               const Divider(),
               ListTile(
@@ -280,7 +335,12 @@ class MainNavigationScreenState extends State<MainNavigationScreen> {
               children: [
                 NavigationRail(
                   selectedIndex: _index,
-                  onDestinationSelected: (value) => setState(() => _index = value),
+                  onDestinationSelected: (value) {
+                    setState(() => _index = value);
+                    if (value == 3) {
+                      context.read<ChatProvider>().markCustomerChatAsRead();
+                    }
+                  },
                   labelType: NavigationRailLabelType.all,
                   backgroundColor: Colors.white,
                   elevation: 1,
@@ -296,19 +356,23 @@ class MainNavigationScreenState extends State<MainNavigationScreen> {
                       icon: cartIcon,
                       label: const Text('Giỏ hàng', style: TextStyle(fontSize: 11)),
                     ),
-                    NavigationRailDestination(
-                      icon: notifyIcon,
-                      label: const Text('Thông báo', style: TextStyle(fontSize: 11)),
-                    ),
                     const NavigationRailDestination(
                       icon: Icon(Icons.map_outlined),
                       selectedIcon: Icon(Icons.map, color: AppColors.primary),
                       label: Text('Địa chỉ', style: TextStyle(fontSize: 11)),
                     ),
-                    const NavigationRailDestination(
-                      icon: Icon(Icons.chat_bubble_outline),
-                      selectedIcon: Icon(Icons.chat_bubble, color: AppColors.primary),
-                      label: Text('Hỗ trợ', style: TextStyle(fontSize: 11)),
+                    NavigationRailDestination(
+                      icon: chatProvider.hasUnreadCustomerChat
+                          ? const Badge(
+                              child: Icon(Icons.chat_bubble_outline),
+                            )
+                          : const Icon(Icons.chat_bubble_outline),
+                      selectedIcon: chatProvider.hasUnreadCustomerChat
+                          ? const Badge(
+                              child: Icon(Icons.chat_bubble, color: AppColors.primary),
+                            )
+                          : const Icon(Icons.chat_bubble, color: AppColors.primary),
+                      label: const Text('Hỗ trợ', style: TextStyle(fontSize: 11)),
                     ),
                   ],
                 ),
@@ -363,7 +427,12 @@ class MainNavigationScreenState extends State<MainNavigationScreen> {
           ? null
           : NavigationBar(
               selectedIndex: _index,
-              onDestinationSelected: (value) => setState(() => _index = value),
+              onDestinationSelected: (value) {
+                setState(() => _index = value);
+                if (value == 3) {
+                  context.read<ChatProvider>().markCustomerChatAsRead();
+                }
+              },
               destinations: [
                 const NavigationDestination(
                   icon: Icon(Icons.watch_outlined),
@@ -374,18 +443,22 @@ class MainNavigationScreenState extends State<MainNavigationScreen> {
                   icon: cartIcon,
                   label: 'Giỏ hàng',
                 ),
-                NavigationDestination(
-                  icon: notifyIcon,
-                  label: 'Thông báo',
-                ),
                 const NavigationDestination(
                   icon: Icon(Icons.map_outlined),
                   selectedIcon: Icon(Icons.map, color: AppColors.primary),
                   label: 'Cửa hàng',
                 ),
-                const NavigationDestination(
-                  icon: Icon(Icons.chat_bubble_outline),
-                  selectedIcon: Icon(Icons.chat_bubble, color: AppColors.primary),
+                NavigationDestination(
+                  icon: chatProvider.hasUnreadCustomerChat
+                      ? const Badge(
+                          child: Icon(Icons.chat_bubble_outline),
+                        )
+                      : const Icon(Icons.chat_bubble_outline),
+                  selectedIcon: chatProvider.hasUnreadCustomerChat
+                      ? const Badge(
+                          child: Icon(Icons.chat_bubble, color: AppColors.primary),
+                        )
+                      : const Icon(Icons.chat_bubble, color: AppColors.primary),
                   label: 'Hỗ trợ',
                 ),
               ],

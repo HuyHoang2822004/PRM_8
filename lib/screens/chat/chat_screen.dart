@@ -19,12 +19,23 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
+  ChatProvider? _chatProvider;
+  int _messageCount = 0;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ChatProvider>().loadAllMessages();
+      final auth = context.read<AuthProvider>();
+      final myEmail = auth.userProfile['email'] ?? 'guest';
+      final isManager = myEmail == 'admin@chrono.com';
+      _chatProvider = context.read<ChatProvider>();
+      _chatProvider!.setCurrentUserEmail(myEmail);
+      if (!isManager) {
+        _chatProvider!.isChatOpen = true;
+      }
+      _chatProvider!.loadAllMessages();
+      _chatProvider!.markCustomerChatAsRead();
       _scrollToBottom(isDelayed: true);
     });
   }
@@ -33,6 +44,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
+    _chatProvider?.isChatOpen = false;
     super.dispose();
   }
 
@@ -49,15 +61,64 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  Future<void> _sendMessage(String email) async {
+  Future<void> _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
     
     _controller.clear();
+    final auth = context.read<AuthProvider>();
+    final email = auth.userProfile['email'] ?? 'guest';
     final provider = context.read<ChatProvider>();
     
     await provider.sendMessageFromCustomer(email, text);
     _scrollToBottom(isDelayed: true);
+  }
+
+  List<Widget> _buildMessageListItems(List<dynamic> conversation, String myEmail) {
+    final List<Widget> items = [];
+    DateTime? lastDate;
+
+    for (final msg in conversation) {
+      final msgDate = DateTime(msg.timestamp.year, msg.timestamp.month, msg.timestamp.day);
+      if (lastDate == null || msgDate != lastDate) {
+        lastDate = msgDate;
+        items.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Row(
+              children: [
+                Expanded(child: Divider(color: Colors.grey.shade200, thickness: 0.5)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(
+                    DateFormat('dd/MM/yyyy').format(msg.timestamp),
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade400,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                Expanded(child: Divider(color: Colors.grey.shade200, thickness: 0.5)),
+              ],
+            ),
+          ),
+        );
+      }
+
+      final isBubbleFromMe = msg.senderEmail == myEmail;
+      items.add(
+        ChatBubble(
+          key: ValueKey(msg.id),
+          message: msg.content,
+          isFromUser: isBubbleFromMe,
+          timestamp: msg.timestamp,
+        ),
+      );
+    }
+
+    return items;
   }
 
   @override
@@ -144,8 +205,25 @@ class _ChatScreenState extends State<ChatScreen> {
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                             ),
-                            trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (provider.unreadChatsForManager.contains(email))
+                                  Container(
+                                    width: 10,
+                                    height: 10,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                if (provider.unreadChatsForManager.contains(email))
+                                  const SizedBox(width: 8),
+                                const Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
+                              ],
+                            ),
                             onTap: () {
+                              provider.markManagerChatAsRead(email);
                               context.push(AppRoutes.managerChatDetail, extra: email);
                             },
                           ),
@@ -160,6 +238,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
     // Customer direct chat view
     final conversation = provider.getConversation(myEmail);
+
+    if (conversation.length > _messageCount) {
+      _messageCount = conversation.length;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToBottom(isDelayed: true);
+      });
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -186,18 +271,10 @@ class _ChatScreenState extends State<ChatScreen> {
           
           // Conversation lists
           Expanded(
-            child: ListView.builder(
+            child: ListView(
               controller: _scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-              itemCount: conversation.length,
-              itemBuilder: (context, index) {
-                final msg = conversation[index];
-                final isBubbleFromMe = msg.senderEmail == myEmail;
-                return ChatBubble(
-                  message: msg.content,
-                  isFromUser: isBubbleFromMe,
-                );
-              },
+              children: _buildMessageListItems(conversation, myEmail),
             ),
           ),
           
@@ -220,7 +297,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       child: TextField(
                         controller: _controller,
                         textInputAction: TextInputAction.send,
-                        onSubmitted: (_) => _sendMessage(myEmail),
+                        onSubmitted: (_) => _sendMessage(),
                         style: const TextStyle(fontSize: 13.5),
                         decoration: const InputDecoration(
                           hintText: 'Nhập tin nhắn để hỏi shop...',
@@ -235,7 +312,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                   const SizedBox(width: 8),
                   GestureDetector(
-                    onTap: () => _sendMessage(myEmail),
+                    onTap: () => _sendMessage(),
                     child: Container(
                       width: 38,
                       height: 38,
