@@ -58,7 +58,10 @@ GoRouter createRouter(AuthProvider authProvider) {
           final initialIndex = tabParam != null ? int.tryParse(tabParam) ?? 0 : 0;
           return CustomTransitionPage(
             key: ValueKey('home_page_$initialIndex'),
-            child: MainNavigationScreen(initialIndex: initialIndex),
+            child: MainNavigationScreen(
+              key: ValueKey('main_nav_screen_$initialIndex'),
+              initialIndex: initialIndex,
+            ),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return FadeTransition(
                 opacity: CurveTween(curve: Curves.easeInOutCubic).animate(animation),

@@ -65,10 +65,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ),
           ],
         ),
+        action: SnackBarAction(
+          label: 'XEM GIỎ HÀNG',
+          textColor: Colors.white,
+          onPressed: () {
+            context.go('${AppRoutes.home}?tab=1');
+          },
+        ),
         backgroundColor: Colors.green.shade600,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 3),
       ),
     );
   }

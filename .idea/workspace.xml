@@ -6,33 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="dbcf3c31-74b8-4ffb-93a7-517655698769" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Runner/AppDelegate.swift" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/AppDelegate.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Runner/Info.plist" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Runner/Info.plist" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/core/constants/app_strings.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/core/constants/app_strings.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/core/routes/app_router.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/core/routes/app_router.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/models/notification.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/models/notification.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/models/product.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/models/product.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/providers/notification_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/notification_provider.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/providers/order_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/order_provider.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/providers/product_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/product_provider.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/admin/admin_product_edit_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/admin/admin_product_edit_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/models/cart_item.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/models/cart_item.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/providers/cart_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/cart_provider.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/screens/cart/cart_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/cart/cart_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/home/main_navigation_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/home/main_navigation_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/map/map_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/map/map_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/notification/notification_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/notification/notification_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/screens/product/product_detail_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/product/product_detail_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/product/product_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/product/product_list_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/product/widgets/product_info_section.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/product/widgets/product_info_section.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/product/widgets/specs_table.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/product/widgets/specs_table.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/services/order_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/order_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/services/product_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/product_service.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/widgets/cart/cart_item_widget.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/widgets/cart/cart_item_widget.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/linux/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/linux/flutter/generated_plugin_registrant.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/linux/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/linux/flutter/generated_plugins.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/windows/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/windows/flutter/generated_plugin_registrant.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/windows/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/windows/flutter/generated_plugins.cmake" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

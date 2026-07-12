@@ -9,6 +9,7 @@ import '../../core/constants/app_strings.dart';
 import '../../providers/cart_provider.dart';
 import '../../widgets/cart/cart_item_widget.dart';
 import '../../widgets/common/custom_button.dart';
+import '../home/main_navigation_screen.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -55,7 +56,12 @@ class CartScreen extends StatelessWidget {
                       width: 200,
                       child: CustomButton(
                         onPressed: () {
-                          context.go(AppRoutes.home);
+                          final navState = context.findAncestorStateOfType<MainNavigationScreenState>();
+                          if (navState != null) {
+                            navState.setTabIndex(0);
+                          } else {
+                            context.go('${AppRoutes.home}?tab=0');
+                          }
                         },
                         label: AppStrings.continueShoppingButton,
                       ),

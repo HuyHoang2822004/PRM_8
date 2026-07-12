@@ -23,10 +23,10 @@ class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key, this.initialIndex = 0});
 
   @override
-  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+  State<MainNavigationScreen> createState() => MainNavigationScreenState();
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen> {
+class MainNavigationScreenState extends State<MainNavigationScreen> {
   late int _index;
 
   final _pages = const [
@@ -68,9 +68,15 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   void didUpdateWidget(MainNavigationScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialIndex != widget.initialIndex) {
+    if (_index != widget.initialIndex) {
       _index = widget.initialIndex;
     }
+  }
+
+  void setTabIndex(int index) {
+    setState(() {
+      _index = index;
+    });
   }
 
   @override
