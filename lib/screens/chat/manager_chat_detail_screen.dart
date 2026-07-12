@@ -27,6 +27,7 @@ class _ManagerChatDetailScreenState extends State<ManagerChatDetailScreen> {
       _chatProvider = context.read<ChatProvider>();
       _chatProvider!.setCurrentUserEmail('admin@chrono.com');
       _chatProvider!.isChatOpen = true;
+      _chatProvider!.activeChatEmail = widget.customerEmail;
       _chatProvider!.startListeningToMessages();
       _chatProvider!.markManagerChatAsRead(widget.customerEmail);
       _scrollToBottom(isDelayed: true);
@@ -37,7 +38,10 @@ class _ManagerChatDetailScreenState extends State<ManagerChatDetailScreen> {
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
-    _chatProvider?.isChatOpen = false;
+    if (_chatProvider != null) {
+      _chatProvider!.isChatOpen = false;
+      _chatProvider!.activeChatEmail = null;
+    }
     super.dispose();
   }
 

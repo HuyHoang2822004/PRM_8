@@ -33,6 +33,7 @@ class _ChatScreenState extends State<ChatScreen> {
       _chatProvider!.setCurrentUserEmail(myEmail);
       if (!isManager) {
         _chatProvider!.isChatOpen = true;
+        _chatProvider!.activeChatEmail = 'admin@chrono.com';
       }
       _chatProvider!.loadAllMessages();
       _chatProvider!.markCustomerChatAsRead();
@@ -44,7 +45,10 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
-    _chatProvider?.isChatOpen = false;
+    if (_chatProvider != null) {
+      _chatProvider!.isChatOpen = false;
+      _chatProvider!.activeChatEmail = null;
+    }
     super.dispose();
   }
 

@@ -72,9 +72,11 @@ class MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   void didUpdateWidget(MainNavigationScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final normalized = _normalizeTabIndex(widget.initialIndex);
-    if (_index != normalized) {
-      _index = normalized;
+    if (widget.initialIndex != oldWidget.initialIndex) {
+      final normalized = _normalizeTabIndex(widget.initialIndex);
+      if (_index != normalized) {
+        _index = normalized;
+      }
     }
   }
 
@@ -97,6 +99,16 @@ class MainNavigationScreenState extends State<MainNavigationScreen> {
     final myEmail = auth.userProfile['email'] ?? 'guest';
     final isManager = myEmail == 'admin@chrono.com';
     final chatProvider = context.watch<ChatProvider>();
+
+    if (chatProvider.requestedCustomerTab != null) {
+      final targetTab = chatProvider.requestedCustomerTab!;
+      chatProvider.clearRequestedCustomerTab();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          _index = targetTab;
+        });
+      });
+    }
 
     if (myEmail != 'guest' && myEmail.isNotEmpty && chatProvider.currentUserEmail != myEmail) {
       WidgetsBinding.instance.addPostFrameCallback((_) {

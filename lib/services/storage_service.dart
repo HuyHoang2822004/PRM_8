@@ -28,10 +28,15 @@ class StorageService {
   Future<String?> uploadImage({required File file, required String path}) async {
     try {
       final ref = _storage.ref().child(path);
-      final uploadTask = await ref.putFile(file);
+      final bytes = await file.readAsBytes();
+      final uploadTask = await ref.putData(
+        bytes,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
       final downloadUrl = await uploadTask.ref.getDownloadURL();
       return downloadUrl;
     } catch (e) {
+      print('DEBUG: Lỗi upload ảnh lên Firebase Storage: $e');
       return null;
     }
   }

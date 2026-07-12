@@ -17,19 +17,97 @@ class ChatProvider extends ChangeNotifier {
   final List<Message> _allMessages = [];
   StreamSubscription<List<Message>>? _streamSubscription;
   bool isChatOpen = false;
+  String? activeChatEmail;
   String? _currentUserEmail;
+  StreamSubscription<QuerySnapshot>? _notificationsSubscription;
 
   bool hasUnreadCustomerChat = false;
   final Set<String> unreadChatsForManager = {};
 
-  void markCustomerChatAsRead() {
-    hasUnreadCustomerChat = false;
+  int? requestedCustomerTab;
+
+  void requestTab(int tabIndex) {
+    requestedCustomerTab = tabIndex;
     notifyListeners();
   }
 
-  void markManagerChatAsRead(String customerEmail) {
+  void clearRequestedCustomerTab() {
+    requestedCustomerTab = null;
+  }
+
+  void startListeningToNotifications(String uid) {
+    _notificationsSubscription?.cancel();
+    _notificationsSubscription = FirebaseFirestore.instance
+        .collection('notifications')
+        .where('userId', isEqualTo: uid)
+        .where('type', isEqualTo: 'chat')
+        .where('isRead', isEqualTo: false)
+        .snapshots()
+        .listen((snapshot) {
+      if (_currentUserEmail == 'admin@chrono.com') {
+        unreadChatsForManager.clear();
+        for (final doc in snapshot.docs) {
+          final data = doc.data();
+          if (data['relatedId'] != null) {
+            unreadChatsForManager.add(data['relatedId'].toString());
+          }
+        }
+      } else {
+        hasUnreadCustomerChat = snapshot.docs.isNotEmpty;
+      }
+      notifyListeners();
+    });
+  }
+
+  Future<void> markCustomerChatAsRead() async {
+    hasUnreadCustomerChat = false;
+    notifyListeners();
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final snapshot = await FirebaseFirestore.instance
+            .collection('notifications')
+            .where('userId', isEqualTo: user.uid)
+            .where('type', isEqualTo: 'chat')
+            .where('isRead', isEqualTo: false)
+            .get();
+        
+        final batch = FirebaseFirestore.instance.batch();
+        for (final doc in snapshot.docs) {
+          batch.update(doc.reference, {'isRead': true});
+        }
+        await batch.commit();
+      }
+    } catch (e) {
+      debugPrint('DEBUG: [ChatProvider] Lỗi khi đánh dấu đã đọc thông báo: $e');
+    }
+  }
+
+  Future<void> markManagerChatAsRead(String customerEmail) async {
     unreadChatsForManager.remove(customerEmail);
     notifyListeners();
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final snapshot = await FirebaseFirestore.instance
+            .collection('notifications')
+            .where('userId', isEqualTo: user.uid)
+            .where('type', isEqualTo: 'chat')
+            .where('relatedId', isEqualTo: customerEmail)
+            .where('isRead', isEqualTo: false)
+            .get();
+        
+        final batch = FirebaseFirestore.instance.batch();
+        for (final doc in snapshot.docs) {
+          batch.update(doc.reference, {'isRead': true});
+        }
+        await batch.commit();
+      }
+    } catch (e) {
+      debugPrint('DEBUG: [ChatProvider] Lỗi khi đánh dấu đã đọc thông báo manager: $e');
+    }
   }
 
   String? get currentUserEmail => _currentUserEmail;
@@ -41,6 +119,18 @@ class ChatProvider extends ChangeNotifier {
       _currentUserEmail = email;
       _streamSubscription?.cancel();
       _streamSubscription = null;
+      
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        startListeningToNotifications(user.uid);
+      } else {
+        FirebaseAuth.instance.authStateChanges().first.then((user) {
+          if (user != null && _currentUserEmail == email) {
+            startListeningToNotifications(user.uid);
+          }
+        });
+      }
+      
       startListeningToMessages();
     }
   }
@@ -109,23 +199,11 @@ class ChatProvider extends ChangeNotifier {
     final isFromMe = lowerSend == lowerCurrent;
 
     if (isForMe && !isFromMe) {
-      // 1. Add to Firestore notifications
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        FirebaseFirestore.instance.collection('notifications').add({
-          'userId': user.uid,
-          'title': msg.senderEmail == 'admin@chrono.com'
-              ? '💬 Tin nhắn mới từ Chrono Luxury'
-              : '💬 Tin nhắn mới từ khách hàng (${msg.senderEmail})',
-          'body': msg.content,
-          'createdAt': FieldValue.serverTimestamp(),
-          'type': 'chat',
-          'isRead': false,
-        }).catchError((_) {});
-      }
+      final isCurrentlyChatting = activeChatEmail != null &&
+          activeChatEmail!.toLowerCase().trim() == msg.senderEmail.toLowerCase().trim();
 
-      // 2. Mark as unread
-      if (!isChatOpen) {
+      if (!isCurrentlyChatting) {
+        // 1. Mark as unread
         if (_currentUserEmail == 'admin@chrono.com') {
           unreadChatsForManager.add(msg.senderEmail);
         } else {
@@ -133,7 +211,7 @@ class ChatProvider extends ChangeNotifier {
         }
         notifyListeners();
 
-        // 3. Show in-app top overlay notification
+        // 2. Show in-app top overlay notification
         final senderName = msg.senderEmail == 'admin@chrono.com' ? 'Chrono Luxury' : msg.senderEmail;
         _showTopNotification(senderName, msg.content);
       }
@@ -300,6 +378,29 @@ class ChatProvider extends ChangeNotifier {
     );
 
     await _chatService.sendMessage(newMsg);
+
+    // Create notification for manager
+    try {
+      final adminSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: 'admin@chrono.com')
+          .limit(1)
+          .get();
+      if (adminSnapshot.docs.isNotEmpty) {
+        final adminUid = adminSnapshot.docs.first.id;
+        await FirebaseFirestore.instance.collection('notifications').add({
+          'userId': adminUid,
+          'title': '💬 Tin nhắn mới từ khách hàng ($customerEmail)',
+          'body': content.trim(),
+          'createdAt': FieldValue.serverTimestamp(),
+          'type': 'chat',
+          'isRead': false,
+          'relatedId': customerEmail,
+        });
+      }
+    } catch (e) {
+      debugPrint('DEBUG: [ChatProvider] Lỗi khi tạo thông báo cho manager: $e');
+    }
   }
 
   Future<void> sendMessageFromManager(String customerEmail, String content) async {
@@ -315,6 +416,29 @@ class ChatProvider extends ChangeNotifier {
     );
 
     await _chatService.sendMessage(newMsg);
+
+    // Create notification for customer
+    try {
+      final userSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: customerEmail)
+          .limit(1)
+          .get();
+      if (userSnapshot.docs.isNotEmpty) {
+        final userUid = userSnapshot.docs.first.id;
+        await FirebaseFirestore.instance.collection('notifications').add({
+          'userId': userUid,
+          'title': '💬 Tin nhắn mới từ Chrono Luxury',
+          'body': content.trim(),
+          'createdAt': FieldValue.serverTimestamp(),
+          'type': 'chat',
+          'isRead': false,
+          'relatedId': 'chat',
+        });
+      }
+    } catch (e) {
+      debugPrint('DEBUG: [ChatProvider] Lỗi khi tạo thông báo cho customer: $e');
+    }
   }
 
   // Deprecated methods mapping to prevent breaks
@@ -333,6 +457,7 @@ class ChatProvider extends ChangeNotifier {
   @override
   void dispose() {
     _streamSubscription?.cancel();
+    _notificationsSubscription?.cancel();
     super.dispose();
   }
 }

@@ -8,6 +8,7 @@ import '../../models/notification.dart';
 import '../../providers/notification_provider.dart';
 import '../../providers/product_provider.dart';
 import '../../providers/order_provider.dart';
+import '../../providers/chat_provider.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -56,10 +57,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
       }
       return;
     } else if (item.type == 'store') {
-      context.go('${AppRoutes.home}?tab=3');
+      context.read<ChatProvider>().requestTab(2);
+      if (context.canPop()) {
+        context.pop();
+      }
       return;
     } else if (item.type == 'chat') {
-      context.go('${AppRoutes.home}?tab=4');
+      context.read<ChatProvider>().requestTab(3);
+      if (context.canPop()) {
+        context.pop();
+      }
       return;
     }
 
