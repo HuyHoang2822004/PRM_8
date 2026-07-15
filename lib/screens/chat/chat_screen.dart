@@ -111,7 +111,7 @@ class _ChatScreenState extends State<ChatScreen> {
         );
       }
 
-      final isBubbleFromMe = msg.senderEmail == myEmail;
+      final isBubbleFromMe = msg.senderEmail.trim().toLowerCase() == myEmail.trim().toLowerCase();
       items.add(
         ChatBubble(
           key: ValueKey(msg.id),

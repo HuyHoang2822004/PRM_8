@@ -54,13 +54,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (!mounted) return;
     if (authProvider.status == AuthStatus.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(AppStrings.registerSuccess),
-          backgroundColor: Colors.green,
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.mark_email_unread, color: AppColors.primary),
+              SizedBox(width: 10),
+              Text('Đăng ký thành công'),
+            ],
+          ),
+          content: const Text(
+            'Tài khoản của bạn đã được tạo.\n\nVui lòng kiểm tra hộp thư đến (kể cả mục Thư rác/Spam) và nhấn vào liên kết để xác thực tài khoản của bạn trước khi đăng nhập.',
+            style: TextStyle(height: 1.5),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Đã hiểu'),
+            ),
+          ],
         ),
       );
-      context.go(AppRoutes.home);
+      if (mounted) context.go(AppRoutes.home);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

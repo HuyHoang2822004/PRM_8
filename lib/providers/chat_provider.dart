@@ -321,13 +321,21 @@ class ChatProvider extends ChangeNotifier {
 
   List<Message> getConversation(String customerEmail) {
     final lowerCustomer = customerEmail.toLowerCase().trim();
-    final res = _allMessages.where((m) {
+    
+    // Deduplicate messages by ID to prevent duplicated messages
+    final Map<String, Message> uniqueMap = {};
+    
+    for (final m in _allMessages) {
       final lowerSender = m.senderEmail.toLowerCase().trim();
       final lowerReceiver = m.receiverEmail.toLowerCase().trim();
       final isCustomerSender = lowerSender == lowerCustomer && lowerReceiver == 'admin@chrono.com';
       final isCustomerReceiver = lowerSender == 'admin@chrono.com' && lowerReceiver == lowerCustomer;
-      return isCustomerSender || isCustomerReceiver;
-    }).toList();
+      if (isCustomerSender || isCustomerReceiver) {
+        uniqueMap[m.id] = m;
+      }
+    }
+    
+    final res = uniqueMap.values.toList();
     
     // Sort by timestamp ascending to ensure order is correct
     res.sort((a, b) => a.timestamp.compareTo(b.timestamp));

@@ -12,6 +12,7 @@ import 'widgets/login_button.dart';
 import 'widgets/login_title.dart';
 import 'widgets/password_input.dart';
 import 'widgets/register_prompt.dart';
+import 'widgets/forgot_password_dialog.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -48,12 +49,69 @@ class _LoginScreenState extends State<LoginScreen> {
     }
     
     if (authProvider.errorMessage != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(authProvider.errorMessage!),
-          backgroundColor: AppColors.accent,
-        ),
-      );
+      if (authProvider.isEmailNotVerified) {
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: AppColors.accent),
+                SizedBox(width: 8),
+                Text('Yêu cầu xác thực'),
+              ],
+            ),
+            content: Text(
+              '${authProvider.errorMessage}\n\nVui lòng kiểm tra hộp thư (kể cả mục Thư rác/Spam) để xác thực tài khoản của bạn.',
+              style: const TextStyle(height: 1.5),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Đóng'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  final ok = await authProvider.resendVerificationEmail(
+                    _emailController.text.trim(),
+                    _passwordController.text.trim(),
+                  );
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          ok ? 'Đã gửi lại email! Vui lòng kiểm tra hộp thư (kể cả Spam).' 
+                             : 'Lỗi khi gửi email, vui lòng thử lại sau.'
+                        ),
+                        backgroundColor: ok ? Colors.green : AppColors.accent,
+                        duration: const Duration(seconds: 4),
+                      ),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('Gửi lại mail'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authProvider.errorMessage!),
+            backgroundColor: AppColors.accent,
+          ),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -88,7 +146,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     EmailInput(controller: _emailController),
                     const SizedBox(height: AppSizes.paddingMedium),
                     PasswordInput(controller: _passwordController),
-                    const SizedBox(height: AppSizes.paddingLarge),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => const ForgotPasswordDialog(),
+                          );
+                        },
+                        child: const Text('Quên mật khẩu?'),
+                      ),
+                    ),
+                    const SizedBox(height: AppSizes.paddingMedium),
                     LoginButton(
                       onPressed: _submit,
                       isLoading: auth.status == AuthStatus.loading,

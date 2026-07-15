@@ -47,6 +47,9 @@ class AuthService {
 
       final uid = credential.user?.uid;
       if (uid != null) {
+        // Send email verification
+        await credential.user?.sendEmailVerification();
+
         // 2. Save additional profile fields to Firestore users collection
         await _firestore.collection('users').doc(uid).set({
           'name': name.trim(),
@@ -56,6 +59,8 @@ class AuthService {
           'createdAt': FieldValue.serverTimestamp(),
         });
       }
+      // Sign out immediately to prevent auto-login before verification
+      await _auth.signOut();
       return true;
     } catch (_) {
       return false;
@@ -64,6 +69,15 @@ class AuthService {
 
   Future<void> logout() async {
     await _auth.signOut();
+  }
+
+  Future<bool> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email.trim().toLowerCase());
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<bool> checkLogin() async {

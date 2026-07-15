@@ -51,7 +51,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       color: selectedColor ?? 'Mặc định',
       quantity: quantity,
     );
-    ScaffoldMessenger.of(context).showSnackBar(
+    ScaffoldMessenger.of(context).clearSnackBars();
+    final controller = ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
@@ -81,6 +82,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         duration: const Duration(seconds: 3),
       ),
     );
+    
+    // Force close after 3 seconds to override accessibility persistence
+    Future.delayed(const Duration(seconds: 3), () {
+      controller.close();
+    });
   }
 
   @override
