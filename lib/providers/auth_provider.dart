@@ -69,14 +69,26 @@ class AuthProvider extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
-    final ok =
-        await _authService.register(name, email, password, phone, address);
-    isLoggedIn = false;
-    if (ok) {
+    try {
+      await _authService.register(name, email, password, phone, address);
+      isLoggedIn = false;
       status = AuthStatus.success;
-    } else {
+    } on fb.FirebaseAuthException catch (e) {
+      isLoggedIn = false;
       status = AuthStatus.error;
-      errorMessage = "Đăng ký không thành công";
+      if (e.code == 'email-already-in-use') {
+        errorMessage = "Email này đã được sử dụng bởi một tài khoản khác.";
+      } else if (e.code == 'invalid-email') {
+        errorMessage = "Định dạng email không hợp lệ.";
+      } else if (e.code == 'weak-password') {
+        errorMessage = "Mật khẩu quá yếu. Vui lòng sử dụng mật khẩu mạnh hơn.";
+      } else {
+        errorMessage = e.message ?? "Đăng ký không thành công.";
+      }
+    } catch (e) {
+      isLoggedIn = false;
+      status = AuthStatus.error;
+      errorMessage = "Đăng ký không thành công: ${e.toString()}";
     }
     notifyListeners();
   }

@@ -5,18 +5,17 @@
     "brand": "Rolex",
     "price": 350000000,
     "salePrice": 345000000,
-    "image": "https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=800",
+    "image": "https://imgs.search.brave.com/LyG5x6J-FrEbYIx_LDX17qiHaD9oTrPgQYpdDh6lEWE/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9iY2Ns/YXJrLmNvbS9jZG4v/c2hvcC9maWxlcy9t/MTI2NjEwbHYtMDAw/Ml8xM2M4NDcyMi1h/Y2IyLTRjMmEtOGIx/MS0zOWJjZmUxOTIw/MWEud2VicD92PTE3/ODAzMzc3OTM",
     "description": "The benchmark for divers' watches, symbol of reliability and elegance.",
     "strapMaterial": "Oystersteel",
     "movement": "Automatic (3235)",
     "waterResistance": "30ATM (300m)",
     "warranty": "5 Years",
-    "stock": 2,
-    "straps": ["Oystersteel", "Rubber B"],
-    "colors": ["Green", "Black"],
+    "stock": 6,
+    "straps": ["Oystersteel"],
+    "colors": ["Green"],
     "images": [
-      "https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=800",
-      "https://images.unsplash.com/photo-1622434641406-a158123450f9?w=800"
+      "https://imgs.search.brave.com/LyG5x6J-FrEbYIx_LDX17qiHaD9oTrPgQYpdDh6lEWE/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9iY2Ns/YXJrLmNvbS9jZG4v/c2hvcC9maWxlcy9t/MTI2NjEwbHYtMDAw/Ml8xM2M4NDcyMi1h/Y2IyLTRjMmEtOGIx/MS0zOWJjZmUxOTIw/MWEud2VicD92PTE3/ODAzMzc3OTM"
     ]
   },
   {
@@ -25,19 +24,17 @@
     "brand": "Casio",
     "price": 3500000,
     "salePrice": 2900000,
-    "image": "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=800",
+    "image": "https://imgs.search.brave.com/-cHdo2qc2kY6tphjw8Pzse8YJmwu4qL8T8uIH32dcz0/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLmVi/YXlpbWcuY29tL2lt/YWdlcy9nLzlvY0FB/ZVN3YTJkcEJ4S2kv/cy1sMjI1LmpwZw",
     "description": "Standard analog-digital watch with carbon core guard structure.",
     "strapMaterial": "Resin",
     "movement": "Quartz",
     "waterResistance": "20ATM (200m)",
     "warranty": "1 Year",
     "stock": 15,
-    "straps": ["Resin Strap", "Metal Custom Strap"],
-    "colors": ["Black", "Red", "Grey"],
+    "straps": ["Resin Strap"],
+    "colors": ["Black"],
     "images": [
-      "https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=800",
-      "https://images.unsplash.com/photo-1600003014755-ba31aa59c4b6?w=800",
-      "https://images.unsplash.com/photo-1533139502658-0198f920d8e8?w=800"
+      "https://imgs.search.brave.com/-cHdo2qc2kY6tphjw8Pzse8YJmwu4qL8T8uIH32dcz0/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLmVi/YXlpbWcuY29tL2lt/YWdlcy9nLzlvY0FB/ZVN3YTJkcEJ4S2kv/cy1sMjI1LmpwZw"
     ]
   },
   {

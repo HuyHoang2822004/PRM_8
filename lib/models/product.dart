@@ -39,26 +39,62 @@ class Product {
   bool get hasDiscount => salePrice != null && salePrice! < price;
 
   factory Product.fromJson(Map<String, dynamic> json) {
-    final mainImage = json['image'] as String;
+    final rootSpecs = json['customSpecs'] as Map<String, dynamic>? ?? {};
+    
+    // Resolve helper for finding fields either at root or nested in customSpecs
+    dynamic getValue(String key) {
+      return json[key] ?? rootSpecs[key];
+    }
+
+    final idVal = getValue('id');
+    final nameVal = getValue('name')?.toString() ?? '';
+    final brandVal = getValue('brand')?.toString() ?? '';
+    final priceVal = getValue('price');
+    final salePriceVal = getValue('salePrice');
+    final imageVal = getValue('image')?.toString() ?? '';
+    final descriptionVal = getValue('description')?.toString() ?? '';
+    final strapMaterialVal = getValue('strapMaterial')?.toString() ?? '';
+    final movementVal = getValue('movement')?.toString() ?? '';
+    final waterResistanceVal = getValue('waterResistance')?.toString() ?? '';
+    final warrantyVal = getValue('warranty')?.toString() ?? '';
+    final stockVal = getValue('stock');
+    
+    // Parsers
+    final int parsedId = idVal is int ? idVal : (idVal != null ? int.tryParse(idVal.toString()) ?? 0 : 0);
+    final int parsedPrice = priceVal is int ? priceVal : (priceVal != null ? int.tryParse(priceVal.toString()) ?? 0 : 0);
+    final int? parsedSalePrice = salePriceVal is int ? salePriceVal : (salePriceVal != null ? int.tryParse(salePriceVal.toString()) : null);
+    final int parsedStock = stockVal is int ? stockVal : (stockVal != null ? int.tryParse(stockVal.toString()) ?? 0 : 0);
+
+    final mainImage = imageVal;
+    
+    // Build custom specs map, excluding the main fields if they were nested
+    final Map<String, String> cleanedCustomSpecs = {};
+    rootSpecs.forEach((k, v) {
+      if (!['id', 'name', 'brand', 'price', 'salePrice', 'image', 'description', 'strapMaterial', 'movement', 'waterResistance', 'warranty', 'stock', 'straps', 'colors', 'images'].contains(k)) {
+        cleanedCustomSpecs[k] = v.toString();
+      }
+    });
+
     return Product(
-      id: json['id'] as int,
-      name: json['name'] as String,
-      brand: json['brand'] as String,
-      price: json['price'] as int,
-      salePrice: json['salePrice'] as int?,
+      id: parsedId,
+      name: nameVal,
+      brand: brandVal,
+      price: parsedPrice,
+      salePrice: parsedSalePrice,
       image: mainImage,
-      description: json['description'] as String? ?? '',
-      strapMaterial: json['strapMaterial'] as String? ?? '',
-      movement: json['movement'] as String? ?? '',
-      waterResistance: json['waterResistance'] as String? ?? '',
-      warranty: json['warranty'] as String? ?? '',
-      stock: json['stock'] as int? ?? 0,
-      straps: (json['straps'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-      colors: (json['colors'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-      images: (json['images'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [mainImage],
-      customSpecs: (json['customSpecs'] as Map<String, dynamic>?)
-              ?.map((k, v) => MapEntry(k, v.toString())) ??
-          {},
+      description: descriptionVal,
+      strapMaterial: strapMaterialVal,
+      movement: movementVal,
+      waterResistance: waterResistanceVal,
+      warranty: warrantyVal,
+      stock: parsedStock,
+      straps: (json['straps'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? 
+              (rootSpecs['straps'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      colors: (json['colors'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? 
+              (rootSpecs['colors'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      images: (json['images'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? 
+              (rootSpecs['images'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [mainImage],
+      customSpecs: cleanedCustomSpecs,
     );
   }
 

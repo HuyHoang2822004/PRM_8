@@ -16,8 +16,8 @@ class ProductService {
       // 1. Fetch from Firestore
       final snapshot = await _firestore.collection('products').get();
 
-      // 2. Auto-seed if database is empty or missing expanded catalog
-      if (snapshot.docs.length < 10) {
+      // 2. Auto-seed if database is empty
+      if (snapshot.docs.isEmpty) {
         final jsonString = await rootBundle.loadString(AppAssets.productsJson);
         final data = json.decode(jsonString) as List<dynamic>;
         final List<Product> localProducts = data

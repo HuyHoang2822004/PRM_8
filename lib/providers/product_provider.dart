@@ -29,7 +29,7 @@ class ProductProvider extends ChangeNotifier {
 
     _productsSubscription = _productService.getProductsStream().listen((list) async {
       isLoading = false;
-      if (list.length < 10) {
+      if (list.isEmpty) {
         await loadProducts();
         return;
       }

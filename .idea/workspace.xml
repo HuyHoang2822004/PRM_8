@@ -5,8 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="dbcf3c31-74b8-4ffb-93a7-517655698769" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/screens/product/product_detail_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/screens/product/product_detail_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/data/products.json" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/products.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/models/product.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/models/product.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/providers/auth_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/auth_provider.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/providers/product_provider.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/providers/product_provider.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/auth_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/auth_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/product_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/product_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

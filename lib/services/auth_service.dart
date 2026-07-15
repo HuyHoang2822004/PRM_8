@@ -28,43 +28,38 @@ class AuthService {
     }
   }
 
-  Future<bool> register(
+  Future<void> register(
     String name,
     String email,
     String password,
     String phone,
     String address,
   ) async {
-    try {
-      final cleanEmail = email.trim().toLowerCase();
-      final cleanPassword = password.trim();
+    final cleanEmail = email.trim().toLowerCase();
+    final cleanPassword = password.trim();
 
-      // 1. Create user in Firebase Auth
-      final credential = await _auth.createUserWithEmailAndPassword(
-        email: cleanEmail,
-        password: cleanPassword,
-      );
+    // 1. Create user in Firebase Auth
+    final credential = await _auth.createUserWithEmailAndPassword(
+      email: cleanEmail,
+      password: cleanPassword,
+    );
 
-      final uid = credential.user?.uid;
-      if (uid != null) {
-        // Send email verification
-        await credential.user?.sendEmailVerification();
+    final uid = credential.user?.uid;
+    if (uid != null) {
+      // Send email verification
+      await credential.user?.sendEmailVerification();
 
-        // 2. Save additional profile fields to Firestore users collection
-        await _firestore.collection('users').doc(uid).set({
-          'name': name.trim(),
-          'email': cleanEmail,
-          'phone': phone.trim(),
-          'address': address.trim(),
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-      }
-      // Sign out immediately to prevent auto-login before verification
-      await _auth.signOut();
-      return true;
-    } catch (_) {
-      return false;
+      // 2. Save additional profile fields to Firestore users collection
+      await _firestore.collection('users').doc(uid).set({
+        'name': name.trim(),
+        'email': cleanEmail,
+        'phone': phone.trim(),
+        'address': address.trim(),
+        'createdAt': FieldValue.serverTimestamp(),
+      });
     }
+    // Sign out immediately to prevent auto-login before verification
+    await _auth.signOut();
   }
 
   Future<void> logout() async {

@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 import 'core/routes/app_router.dart';
 import 'core/theme/app_theme.dart';
@@ -26,8 +27,15 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  GoRouter? _router;
 
   @override
   Widget build(BuildContext context) {
@@ -42,13 +50,13 @@ class MyApp extends StatelessWidget {
       ],
       child: Builder(
         builder: (context) {
-          final router = createRouter(context.watch<AuthProvider>());
+          _router ??= createRouter(context.read<AuthProvider>());
           return MaterialApp.router(
             scaffoldMessengerKey: scaffoldMessengerKey,
             debugShowCheckedModeBanner: false,
             title: 'Chrono Luxury',
             theme: AppTheme.lightTheme,
-            routerConfig: router,
+            routerConfig: _router!,
           );
         },
       ),
